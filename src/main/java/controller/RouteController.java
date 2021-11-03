@@ -1,4 +1,4 @@
-package Controller;
+package controller;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
@@ -8,27 +8,22 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Response;
 
-import Model.Vehicle;
+import model.Vehicle;
 
 @Consumes({"application/json"})
 @Produces("application/json")
 @Path("/routes")
-
 public class RouteController {
 			
 	public RouteController() {
-	super();
+		super();
 	}
-	@GET
 	
+	@GET
 	public Response bestRoute(@QueryParam("fromLat") double fromLat, @QueryParam("fromLong") double fromLong, 
 			@QueryParam("toLat") double toLat, @QueryParam("toLong") double toLong) {
-return null;
-	
-	
-	
-
-}
+		return null;
+	}
 	
 	@POST
 	@Path("/nearestVehicle")
@@ -42,7 +37,4 @@ return null;
 		return null;
 	}
 	
-	
-	
-	
-	}
+}
