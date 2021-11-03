@@ -1,0 +1,40 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>1.0</modelVersion>
+	<artifactId>MSRoute</artifactId>
+	<version>1</version>
+	<groupId>optimusbus</groupId>
+	<properties>
+		<cxf.version>3.4.3</cxf.version>
+		<maven.compiler.target>1.8</maven.compiler.target>
+    	<maven.compiler.source>1.8</maven.compiler.source>
+	</properties>
+	<dependencies>
+	    <dependency>
+	        <groupId>org.mongodb</groupId>
+	        <artifactId>mongo-java-driver</artifactId>
+	        <version>3.4.3</version>
+	    </dependency>
+	    <dependency>
+		        <groupId>org.apache.cxf</groupId>
+		        <artifactId>cxf-rt-frontend-jaxws</artifactId>
+		        <version>${cxf.version}</version>
+	    	</dependency>
+	    	<dependency>
+				 <groupId>org.apache.cxf</groupId>
+				 <artifactId>cxf-rt-rs-client</artifactId>
+				 <version>${cxf.version}</version>
+			</dependency>
+	    	<dependency>
+		        <groupId>org.apache.cxf</groupId>
+		        <artifactId>cxf-rt-transports-http</artifactId>
+		        <version>${cxf.version}</version>
+	    	</dependency>
+	    	<dependency>
+		        <groupId>org.apache.cxf</groupId>
+		        <artifactId>cxf-rt-transports-http-jetty</artifactId>
+		        <version>${cxf.version}</version>
+	    	</dependency>
+	    
+	</dependencies>
+</project>
