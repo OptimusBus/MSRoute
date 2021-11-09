@@ -6,6 +6,7 @@ import org.bson.Document;
 
 @XmlRootElement
 public class Location {
+	public Location() {}
 	public Location(double lati, double longi) {
 		latitude = lati;
 		longitude = longi;

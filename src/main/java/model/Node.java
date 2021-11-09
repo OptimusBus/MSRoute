@@ -15,6 +15,10 @@ public class Node {
 		this.potentialDemand = potentialDemand;
 	}
 	
+	public Node() {
+		super();
+	}
+
 	public Location getLocation() {
 		return location;
 	}

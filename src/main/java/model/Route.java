@@ -9,10 +9,11 @@ public class Route {
 	
 	public Route(){}
 	
-	public Route(String vehicleId, List<Node> route){
+	public Route(String vehicleId, List<Node> route, double lenght){
 		this.route = route;
 		this.size = route.size();
 		this.vehicleId = vehicleId;
+		this.lenght = 0;
 	}
 	
 	public List<Node> getPickUps() {
@@ -58,6 +59,7 @@ public class Route {
 		Document d = new Document();
 		d.append("vehicleId", r.getVehicleId());
 		d.append("size", r.getSize());
+		d.append("lenght", r.getLenght());
 		int i = 0;
 		for(Node n : r.getRoute()) {
 			d.append(String.valueOf(i), Node.encodeNode(n));
@@ -66,6 +68,10 @@ public class Route {
 		return d;
 	}
 	
+	public double getLenght() {
+		return this.lenght;
+	}
+
 	public static Route decodeRoute(Document d) {
 		if(d.size()<0)return null;
 		String veId = d.getString("vehicleId");
@@ -74,12 +80,14 @@ public class Route {
 		for(int i = 0; i < size; i++) {
 			route.add(Node.decodeNode((Document)d.get(String.valueOf(i))));
 		}
-		return new Route(veId, route);
+		double lenght = d.getDouble("lenght");
+		return new Route(veId, route, lenght);
 	}
 
 	private List<Node> route;
 	private String vehicleId;
 	private int size;
+	private double lenght;
 	
 	
 }

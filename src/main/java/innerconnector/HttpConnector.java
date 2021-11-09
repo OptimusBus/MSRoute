@@ -44,6 +44,15 @@ public class HttpConnector {
 	public static Response getStreet(int start, int dest) {
 		return makeRequest(roadNetworkAddr,"street?start="+start+"&dest="+dest, Method.GET, null);
 	}
+	public static Response getVehicle(String id) {
+		return makeRequest(vehicleAddr, "vehicles/"+id, Method.GET, null);
+	}
+	public static Response getActiveBookings() {
+		return null;
+	}
+	public static Response getBookingsByVehicle(String vehicleId) {
+		return null;
+	}
 	
 	private static final String roadNetworkAddr="";//Address of RoadNetworkService
 	private static final String bookingAddr = "";
