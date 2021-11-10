@@ -1,4 +1,4 @@
-package Algorithm;
+package algorithm;
 
 import java.io.FileReader;
 import java.util.ArrayList;
