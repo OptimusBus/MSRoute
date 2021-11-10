@@ -14,6 +14,10 @@ import model.Route;
 
 public class MongoConnector {
 	
+	public MongoConnector() {
+		super();
+	}
+	
 	public Document getRouteByVehicleId(String vehicleId) {
 		MongoDatabase db=m.getDatabase("RoutesDB");
 		MongoCollection<Document> coll=db.getCollection("routes");

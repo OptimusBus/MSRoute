@@ -9,6 +9,7 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Response;
 
 import model.Vehicle;
+import service.*;
 
 @Consumes({"application/json"})
 @Produces("application/json")
@@ -17,6 +18,12 @@ public class RouteController {
 			
 	public RouteController() {
 		super();
+	}
+	
+	@GET
+	@Path("/ok")
+	public Response ok() {
+		return Response.ok("Hello funziono").build();
 	}
 	
 	@GET
@@ -36,5 +43,7 @@ public class RouteController {
 	public Response bestStandingPoint(Vehicle s) {
 		return null;
 	}
+	
+	private BranchLocal branch = new Branch();
 	
 }

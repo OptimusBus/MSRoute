@@ -103,7 +103,7 @@ public class Vehicle {
 	public static Vehicle decodeVehicle(Document d) {
 		if(d.size() == 0) return null;
 		String id = d.getString("vehicleId");
-		String sp = d.getString("standingPoint");
+		String sp = d.getInteger("standingPoint").toString();
 		String vts = d.getString("vehicleToSupport");
 		boolean ia = d.getBoolean("isActive", false);
 		int mo = d.getInteger("maxOccupancy", 7);
@@ -113,7 +113,8 @@ public class Vehicle {
 		else if(d.getString("state").equalsIgnoreCase("SUPPORTO")) s = State.SUPPORTO;
 		else if(d.getString("state").equalsIgnoreCase("FUORISERVIZIO")) s = State.FUORISERVIZIO;
 		Location l = Location.decodeLocation((Document)d.get("location"));
-		Route r = Route.decodeRoute((Document)d.get("route"));
+		Route r = null;
+		if(d.get("route")!= null)r = Route.decodeRoute((Document)d.get("route"));
 		return new Vehicle(id, l, sp, ia, mo, co, vts, s, r);
 	}
 	

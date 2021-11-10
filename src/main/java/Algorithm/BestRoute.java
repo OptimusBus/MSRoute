@@ -27,7 +27,7 @@ public class BestRoute{
 		BestRoute m = new BestRoute();
 		try {
 			m.loadFiles();
-			m.algo();
+			m.parallelAlgo();
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -107,7 +107,9 @@ public class BestRoute{
 				Node vn = branch.getNearestNode(v.getLocation().getLatitude(), v.getLocation().getLongitude());
 				int start = Integer.parseInt(vn.getNodeId());
 				int dest = Integer.parseInt(n.getNodeId());
-				map.put(v.getVehicleId(), -branch.getShortestRoute(start, dest).getLenght());
+				System.out.println("Request for nodes: " + start + " " + dest);
+				double r = branch.getShortestRoute(start, dest);
+				map.put(v.getVehicleId(), - r);
 			}
 			Record r = new Record(n.getNodeId(), map);
 			records.add(r);
@@ -124,6 +126,32 @@ public class BestRoute{
 		KMeans.saveCluster(clusters, "clusters.json");
 	}
 	
+	public void parallelAlgo() throws InterruptedException {
+		ArrayList<Node> waitNodes = getWaitingDeparture();
+		ArrayList<Record> records = new ArrayList<>();
+		ThreadGroup tg = new ThreadGroup("records");
+		ArrayList<ParallelPath> threads = new ArrayList<>();
+		for(Node n : waitNodes) {
+			ParallelPath p = new ParallelPath(tg, vehicles, n);
+			threads.add(p);
+			p.start();
+		}
+		for(ParallelPath p : threads) {
+			p.join();
+			records.add(p.getRecord());
+		}
+		tg.destroy();
+		for (Record r  : records) {
+			System.out.println("Node: "+r.getDescription());
+			for(String s : r.getFeatures().keySet()) {
+				System.out.println("\t"+s+": "+r.getFeatures().get(s));
+			}
+		}
+		Map<Centroid, List<Record>> clusters = KMeans.fit(records, vehicles.size(), new EuclideanDistance(), 50);
+		KMeans.printCluster(clusters);
+		KMeans.saveCluster(clusters, "clusters.json");
+		
+	}
 	
 	public ArrayList<Node> getWaitingDeparture(){
 		ArrayList<Node> waitpick = new ArrayList<Node>();
@@ -160,4 +188,42 @@ public class BestRoute{
 	private ArrayList<Vehicle> vehicles = new ArrayList<Vehicle>();
 	private ArrayList<Booking> bookings = new ArrayList<Booking>();
 	private static final double MAX_DISTANCE = 999999999999.0;
+	
+	private class ParallelPath extends Thread{
+				
+		public ParallelPath(ThreadGroup tg, List<Vehicle> vehicles, Node node) {
+			super(tg, node.getNodeId());
+			this.vehicles = vehicles;
+			this.node = node;
+		}
+		
+		public List<Vehicle> getVehicle(){
+			return this.vehicles;
+		}
+		public Node getNode() {
+			return this.node;
+		}
+		public Record getRecord() {
+			return this.rec;
+		}
+		
+		public void run() {
+			Branch branch = new Branch();
+				HashMap<String, Double> map = new HashMap<>();
+				for(Vehicle v : vehicles) {
+					Node vn = branch.getNearestNode(v.getLocation().getLatitude(), v.getLocation().getLongitude());
+					int start = Integer.parseInt(vn.getNodeId());
+					int dest = Integer.parseInt(node.getNodeId());
+					System.out.println("Request for nodes: " + start + " " + dest);
+					double r = branch.getShortestRoute(start, dest);
+					
+					map.put(v.getVehicleId(), - r);
+				}
+				rec = new Record(node.getNodeId(), map);
+		}
+		
+		private Node node;
+		private List<Vehicle> vehicles;
+		private Record rec;
+	}
 }
