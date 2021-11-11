@@ -66,6 +66,14 @@ public class HttpConnector {
 		param.put("dest", dest.toString());
 		return makeRequest(roadNetworkAddr,"street", Method.GET, param, null);
 	}
+	public static Response getShortestStreet(Integer source, Integer dest) {
+		Map<String, String> param = new HashMap<String, String>();
+		param.put("source", source.toString());
+		param.put("dest", dest.toString());
+		Response r = makeRequest(roadNetworkAddr,"shortestStreet", Method.GET, param,  null);
+		System.out.println(r.getStatus());
+		return r;
+	}
 	public static Response getVehicle(String id) {
 		return makeRequest(vehicleAddr, "vehicles/"+id, Method.GET, null, null);
 	}

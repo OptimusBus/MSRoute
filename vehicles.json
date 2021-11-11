@@ -16,10 +16,10 @@
   {
     "vehicleId" : "VE0002",
     "location" : {
-      "latitude" : 45.5808936,
-      "longitude" : 4.7452233
+      "latitude" : 45.6044913,
+      "longitude" : 4.7829005
     },
-    "standingPoint" : 141236,
+    "standingPoint" : 69019,
     "state" : "PRINCIPALE",
     "isActive" : true,
     "route" : null,

@@ -28,6 +28,7 @@ public class BestRoute{
 		try {
 			m.loadFiles();
 			m.parallelAlgo();
+			//m.algo();
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -108,7 +109,7 @@ public class BestRoute{
 				int start = Integer.parseInt(vn.getNodeId());
 				int dest = Integer.parseInt(n.getNodeId());
 				System.out.println("Request for nodes: " + start + " " + dest);
-				double r = branch.getShortestRoute(start, dest);
+				double r = branch.getShortestStreet(start, dest);
 				map.put(v.getVehicleId(), - r);
 			}
 			Record r = new Record(n.getNodeId(), map);
@@ -121,25 +122,31 @@ public class BestRoute{
 				System.out.println("\t"+s+": "+r.getFeatures().get(s));
 			}
 		}
-		Map<Centroid, List<Record>> clusters = KMeans.fit(records, vehicles.size(), new EuclideanDistance(), 50);
+		Map<Centroid, List<Record>> clusters = KMeans.fit(records, vehicles.size(), new EuclideanDistance(), 10);
 		KMeans.printCluster(clusters);
 		KMeans.saveCluster(clusters, "clusters.json");
 	}
 	
 	public void parallelAlgo() throws InterruptedException {
-		ArrayList<Node> waitNodes = getWaitingDeparture();
+		List<Node> wn = getWaitingDeparture();
 		ArrayList<Record> records = new ArrayList<>();
 		ThreadGroup tg = new ThreadGroup("records");
-		ArrayList<ParallelPath> threads = new ArrayList<>();
-		for(Node n : waitNodes) {
-			ParallelPath p = new ParallelPath(tg, vehicles, n);
-			threads.add(p);
-			p.start();
-		}
-		for(ParallelPath p : threads) {
-			p.join();
-			records.add(p.getRecord());
-		}
+		/*
+		 * Per gestire l'esecuzione parallela bisogna dividere l'insieme dei nodi per cui si vuole eseguire la clasterizzazione in
+		 * N parti, dove N è il numero di thread che si vuole utilizzare
+		 */
+		ParallelPath p1 = new ParallelPath(tg, vehicles, wn.subList(0, wn.size()%2-1));
+		ParallelPath p2 = new ParallelPath(tg, vehicles, wn.subList(wn.size()%2, wn.size()-1));
+		p1.start();
+		p2.start();
+		p1.join();
+		p2.join();
+		/*
+		 * Al termine dell'esecuzione dei thread ognuno conterrà un sub set di records necessari a costruire 
+		 * il sub set di record necessario ad eseguire la clusterizzazione
+		 */
+		records = p1.getRecords();
+		records.addAll(p2.getRecords());
 		tg.destroy();
 		for (Record r  : records) {
 			System.out.println("Node: "+r.getDescription());
@@ -188,42 +195,71 @@ public class BestRoute{
 	private ArrayList<Vehicle> vehicles = new ArrayList<Vehicle>();
 	private ArrayList<Booking> bookings = new ArrayList<Booking>();
 	private static final double MAX_DISTANCE = 999999999999.0;
-	
+	/*
+	 * Questa classe implementa il thread per eseguire la costruzione in parallelo dei record utilizzati
+	 * dall'algoritmo di classificazione K-means
+	 * Ogni record è costituito dall'id del nodo e una mappa che contiene la distanza di quel nodo dal veicolo
+	 * @class ParallelPath
+	 */
 	private class ParallelPath extends Thread{
-				
-		public ParallelPath(ThreadGroup tg, List<Vehicle> vehicles, Node node) {
-			super(tg, node.getNodeId());
+		/*
+		 * Per costruire il thread sono necessari, thread group di riferimento (utilizzato poi per cancellare tutti i thread insieme)
+		 * La lista dei veicoli su cui si effettua la clusterizzazione e il subset di nodi per cui generare i record
+		 * @param tg thread group di riferimento
+		 * @param vehicles lista dei veicoli su cui si vuole effettuare la clusterizzazione
+		 * @param nodes subset di nodi per cui generare i record
+		 */
+		public ParallelPath(ThreadGroup tg, List<Vehicle> vehicles, List<Node> nodes) {
+			super(tg, "SubThread");
 			this.vehicles = vehicles;
-			this.node = node;
+			this.nodes = nodes;
 		}
 		
 		public List<Vehicle> getVehicle(){
 			return this.vehicles;
 		}
-		public Node getNode() {
-			return this.node;
+		public List<Node> getNodes() {
+			return this.nodes;
 		}
-		public Record getRecord() {
-			return this.rec;
+		public ArrayList<Record> getRecords() {
+			return this.records;
 		}
-		
+		/*
+		 * nel metodo run per ogni nodo si esegue un'iterazione.
+		 * Ogni thread ha il proprio oggetto branch per eseguire le richieste ai servizi remoti necessari.
+		 * Le richieste per i nearest node vengono eseguiti una sola volta prima di ripetere il calcolo dello 
+		 * shortest path per ogni nodo (evitiamo di ripetere sempre le stesse richieste)
+		 * Si crea una mappa VehicleId - Nodo che verrà utilizzata per conoscere l'appartenenza del nodo ottenuto dalle richieste
+		 * nearestnode al rispettivo veicolo 
+		 * Viene costruita la mappa di appoggio per conservare i parametri (distanza veicolo nodo per ogni veicolo)
+		 * Si itera poi per ogni veicolo:
+		 * 			1. si richiede il valore dello shortest path (ottenuto tramite la lista di street)
+		 * 			2. si inserisce il paramentro ottenuto nella mappa come coppia VehicleId e valore della distanza del path
+		 * al termine dell'iterazione dei veicoli per quel nodo si costruisce un record e lo si inserisce nella sublist di record 
+		 * del thread
+		 */
 		public void run() {
 			Branch branch = new Branch();
-				HashMap<String, Double> map = new HashMap<>();
-				for(Vehicle v : vehicles) {
-					Node vn = branch.getNearestNode(v.getLocation().getLatitude(), v.getLocation().getLongitude());
-					int start = Integer.parseInt(vn.getNodeId());
-					int dest = Integer.parseInt(node.getNodeId());
-					System.out.println("Request for nodes: " + start + " " + dest);
-					double r = branch.getShortestRoute(start, dest);
-					
-					map.put(v.getVehicleId(), - r);
+			Map<String, Node> vehNodes = new HashMap<>();
+			for (Vehicle v : vehicles) {
+				Node nv = branch.getNearestNode(v.getLocation().getLatitude(), v.getLocation().getLongitude());
+				vehNodes.put(v.getVehicleId(), nv);
+			}
+			for(Node n : nodes) {
+				Map<String, Double> param = new HashMap<>();
+				for(String s : vehNodes.keySet()) {
+					Node nv = vehNodes.get(s);
+					int start = Integer.parseInt(nv.getNodeId());
+					int to = Integer.parseInt(n.getNodeId());
+					double r = branch.getShortestStreet(start, to);
+					param.put(s, -r);
 				}
-				rec = new Record(node.getNodeId(), map);
+				records.add(new Record(n.getNodeId(), param));
+			}
 		}
 		
-		private Node node;
+		private List<Node> nodes;
 		private List<Vehicle> vehicles;
-		private Record rec;
+		private ArrayList<Record> records = new ArrayList<>();
 	}
 }

@@ -64,17 +64,30 @@ public class Branch implements BranchLocal {
 	}
 	
 	@Override
-	public double getShortestRoute(int start, int dest) {
-		Response r = HttpConnector.getShortestPath(start, dest);
-		if(r.getStatus() != 200 ) {
-			int i = 0;
-			while(r.getStatus() != 200 && i < 5) {
-				r.close();
-				r = HttpConnector.getShortestPath(start, dest);
-				i++;
-			}
-			if(r.getStatus()!=200)return MAXVALUE;
+	public double getShortestStreet(int start, int dest) {
+		Response r = HttpConnector.getShortestStreet(start, dest);
+		if(r.getStatus()!=200)return 0;
+		String s = r.readEntity(String.class);
+		BsonArray list = BsonArray.parse(s);
+		Iterator<BsonValue> i = list.iterator();
+		ArrayList<Street> streets = new ArrayList<>();
+		while(i.hasNext()) {
+			Document d = Document.parse(i.next().toString());
+			Street str = Street.decodeStreet(d);
+			if(str == null)return 0;
+			streets.add(str);
 		}
+		r.close();
+		double length = 0;
+		for(Street str : streets) {
+			length += str.getLenght();
+		}
+		return length;
+	}
+	
+	public List<Node> getShortestPath(int start, int dest){
+		Response r = HttpConnector.getShortestPath(start, dest);
+		if(r.getStatus() != 200)return null;
 		String s = r.readEntity(String.class);
 		BsonArray list = BsonArray.parse(s);
 		Iterator<BsonValue> i = list.iterator();
@@ -82,37 +95,11 @@ public class Branch implements BranchLocal {
 		while(i.hasNext()) {
 			Document d = Document.parse(i.next().toString());
 			Node n = Node.decodeNode(d);
-			if(n == null)return MAXVALUE;
+			if(n == null)return null;
 			path.add(n);
 		}
 		r.close();
-		double lenght = 0.0;
-		for(int c = 0; c < path.size()-1; c++) {
-			int str = Integer.parseInt(path.get(c).getNodeId());
-			int dst = Integer.parseInt(path.get(c+1).getNodeId());
-			Response rs = HttpConnector.getStreet(str, dst);
-			if(r.getStatus() == 200) {
-				System.out.println(lenght);
-				Document d = Document.parse(rs.readEntity(String.class));
-				double len = Street.decodeStreet(d).getLenght();
-				lenght += len;
-			}else {
-				int j = 0;
-				while(rs.getStatus() != 200 && j < 5) {
-					rs.close();
-					rs = HttpConnector.getShortestPath(start, dest);
-					j++;
-				}
-				if(r.getStatus() == 200) {
-					System.out.println(lenght);
-					Document d = Document.parse(rs.readEntity(String.class));
-					double len = Street.decodeStreet(d).getLenght();
-					lenght += len;
-				}
-			}
-			rs.close();
-		}
-		return lenght;
+		return path;
 	}
 	
 	private static final double MAXVALUE = 99999999999999999.0;
