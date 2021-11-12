@@ -46,6 +46,7 @@ public class HttpConnector {
 				return null;
 		}
 	}
+	
 	/**
 	 * Request the shortest path form the MSRoadNetwork service
 	 * @param source the id of the starting Node
@@ -146,7 +147,7 @@ public class HttpConnector {
 		return null;
 	}
 	
-	private static final String baseAddress = "http://gateway-optimusbus.router.default.svc.cluster.local/optimusbus";
+	private static final String baseAddress = "http://127.0.0.1:8080/MSRoadNetwork/RoadNetworkApplication-1.0";
 	public static enum Method {GET, POST, PUT, DELETE}
 	
 }

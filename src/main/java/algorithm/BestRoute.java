@@ -145,30 +145,68 @@ public class BestRoute{
 		List<Node> wn = getWaitingDeparture();
 		ArrayList<Record> records = new ArrayList<>();
 		ThreadGroup tg = new ThreadGroup("records");
+		ArrayList<ParallelPath> threads = new ArrayList<>();
 		/*
 		 * Per gestire l'esecuzione parallela bisogna dividere l'insieme dei nodi per cui si vuole eseguire la clasterizzazione in
 		 * N parti, dove N è il numero di thread che si vuole utilizzare
 		 */
-		ParallelPath p1 = new ParallelPath(tg, vehicles, wn.subList(0, wn.size()%2-1));
-		ParallelPath p2 = new ParallelPath(tg, vehicles, wn.subList(wn.size()%2, wn.size()-1));
-		p1.start();
-		p2.start();
-		p1.join();
-		p2.join();
+		System.out.println("full");
+		for(Node n : wn) {
+			System.out.println("\t"+n.getNodeId());
+		}
+		int size = wn.size();
+		List<Node> sub1 = wn.subList(0, (size/2));
+		System.out.println("Sub1");
+		for(Node n : sub1) {
+			System.out.println("\t"+n.getNodeId());
+		}
+		List<Node> sub2 = wn.subList(size/2, size);
+		System.out.println("Sub2");
+		for(Node n : sub2) {
+			System.out.println("\t"+n.getNodeId());
+		}
+		size = sub1.size();
+		List<Node> sub1_1 = sub1.subList(0, (size/2));
+		System.out.println("Sub1_1");
+		for(Node n : sub1_1) {
+			System.out.println("\t"+n.getNodeId());
+		}
+		List<Node> sub1_2 = sub1.subList(size/2, size);
+		System.out.println("Sub1_2");
+		for(Node n : sub1_2) {
+			System.out.println("\t"+n.getNodeId());
+		}
+		size = sub2.size();
+		List<Node> sub2_1 = sub2.subList(0, (size/2));
+		System.out.println("Sub2_1");
+		for(Node n : sub2_1) {
+			System.out.println("\t"+n.getNodeId());
+		}
+		List<Node> sub2_2 = sub2.subList(size/2, size);
+		System.out.println("Sub2_2");
+		for(Node n : sub2_2) {
+			System.out.println("\t"+n.getNodeId());
+		}
+		threads.add(new ParallelPath(tg, vehicles, sub1_1));
+		threads.add(new ParallelPath(tg, vehicles, sub1_2));
+		threads.add(new ParallelPath(tg, vehicles, sub2_1));
+		threads.add(new ParallelPath(tg, vehicles, sub2_2));
+		for(ParallelPath p : threads) {
+			p.start();
+			p.join();
+			records.addAll(p.getRecords());
+		}
 		/*
 		 * Al termine dell'esecuzione dei thread ognuno conterrà un sub set di records necessari a costruire 
 		 * il sub set di record necessario ad eseguire la clusterizzazione
 		 */
-		records = p1.getRecords();
-		records.addAll(p2.getRecords());
-		tg.destroy();
 		for (Record r  : records) {
 			System.out.println("Node: "+r.getDescription());
 			for(String s : r.getFeatures().keySet()) {
 				System.out.println("\t"+s+": "+r.getFeatures().get(s));
 			}
 		}
-		Map<Centroid, List<Record>> clusters = KMeans.fit(records, vehicles.size(), new EuclideanDistance(), 50);
+		Map<Centroid, List<Record>> clusters = KMeans.fit(records, vehicles.size(), new EuclideanDistance(), 20);
 		KMeans.printCluster(clusters);
 		KMeans.saveCluster(clusters, "clusters.json");
 		
