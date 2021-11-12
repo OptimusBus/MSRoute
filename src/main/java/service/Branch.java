@@ -33,10 +33,9 @@ public class Branch implements BranchLocal {
 	 */
 	@Override
 	public Route getRoute(String vehicleId) {
-		//Document d = mdb.getRouteByVehicleId(vehicleId);
-		//if(d.size()<0)return null;
-		//return Route.decodeRoute(d);
-		return null;
+		Document d = mdb.getRouteByVehicleId(vehicleId);
+		if(d.size()<0)return null;
+		return Route.decodeRoute(d);
 	}
 	
 	/**
@@ -46,9 +45,8 @@ public class Branch implements BranchLocal {
 	 */
 	@Override
 	public boolean saveRoute(Route r) {
-		Document d = Route.encodeRoute(r);
-		//mdb.saveRoute(r);
-		//if(mdb.getRouteByVehicleId(r.getVehicleId())== null)return false;
+		mdb.saveRoute(r);
+		if(mdb.getRouteByVehicleId(r.getVehicleId())== null)return false;
 		return true;
 	}
 	
@@ -59,8 +57,7 @@ public class Branch implements BranchLocal {
 	 */
 	@Override
 	public boolean deleteRoute(String vehicleId) {
-		//return mdb.removeRoute(vehicleId);
-		return false;
+		return mdb.removeRoute(vehicleId);
 	}
 	
 	/**
@@ -133,6 +130,6 @@ public class Branch implements BranchLocal {
 		return path;
 	}
 	
-	//private MongoConnector mdb = new MongoConnector();
+	private MongoConnector mdb = new MongoConnector();
 
 }

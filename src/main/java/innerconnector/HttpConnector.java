@@ -17,14 +17,13 @@ public class HttpConnector {
 	
 	/**
 	 * Generic request maker for Http request
-	 * @param baseAddress the address of the service
 	 * @param url the url of the request
 	 * @param m the type of request to execute (GET, POST, DELETE, PUT)
 	 * @param queryParam a map of query param - value for multiple param GET request
 	 * @param params the params for POST and PUT request
 	 * @return a Response or null
 	 */
-	private static Response makeRequest(String baseAddress, String url, Method m, Map<String,String> queryParam, String params) {	
+	private static Response makeRequest(String url, Method m, Map<String,String> queryParam, String params) {	
 		WebClient client = WebClient.create(baseAddress);
 		client.accept("application/json");
 		client.type("application/json");
@@ -57,7 +56,7 @@ public class HttpConnector {
 		Map<String, String> param = new HashMap<String, String>();
 		param.put("source", source.toString());
 		param.put("dest", dest.toString());
-		Response r = makeRequest(roadNetworkAddr,"shortestPath", Method.GET, param,  null);
+		Response r = makeRequest("/roadNetwork/shortestPath", Method.GET, param,  null);
 		System.out.println(r.getStatus());
 		return r;
 	}
@@ -68,7 +67,7 @@ public class HttpConnector {
 	 * @return the Response of the  service
 	 */
 	public static Response getNodeById(String id) {
-		return makeRequest(roadNetworkAddr,""+id, Method.GET, null, null);
+		return makeRequest("/roadNetwork/"+id, Method.GET, null, null);
 	}
 	
 	/**
@@ -81,7 +80,7 @@ public class HttpConnector {
 		Map<String, String> param = new HashMap<String, String>();
 		param.put("latitude", lat.toString());
 		param.put("longitude", lon.toString());
-		return makeRequest(roadNetworkAddr,"nearestNode", Method.GET, param, null);
+		return makeRequest("/roadNetwork/nearestNode", Method.GET, param, null);
 	}
 	
 	/**
@@ -90,7 +89,7 @@ public class HttpConnector {
 	 * @return the Response of the service
 	 */
 	public static Response getStreetbyId(String id) {
-		return makeRequest(roadNetworkAddr,"street/"+id, Method.GET, null, null);
+		return makeRequest("/roadNetwork/street/"+id, Method.GET, null, null);
 	}
 	
 	/**
@@ -103,7 +102,7 @@ public class HttpConnector {
 		Map<String, String> param = new HashMap<String, String>();
 		param.put("start", start.toString());
 		param.put("dest", dest.toString());
-		return makeRequest(roadNetworkAddr,"street", Method.GET, param, null);
+		return makeRequest("/roadNetwork/street", Method.GET, param, null);
 	}
 	
 	/**
@@ -116,7 +115,7 @@ public class HttpConnector {
 		Map<String, String> param = new HashMap<String, String>();
 		param.put("source", source.toString());
 		param.put("dest", dest.toString());
-		Response r = makeRequest(roadNetworkAddr,"shortestStreet", Method.GET, param,  null);
+		Response r = makeRequest("/roadNetwork/shortestStreet", Method.GET, param,  null);
 		System.out.println(r.getStatus());
 		return r;
 	}
@@ -127,7 +126,7 @@ public class HttpConnector {
 	 * @return the Response of the Service
 	 */
 	public static Response getVehicle(String id) {
-		return makeRequest(vehicleAddr, "vehicles/"+id, Method.GET, null, null);
+		return makeRequest("/vehicles/"+id, Method.GET, null, null);
 	}
 	
 	/**
@@ -147,9 +146,7 @@ public class HttpConnector {
 		return null;
 	}
 	
-	private static final String roadNetworkAddr="http://127.0.0.1:8080/MSRoadNetwork/RoadNetworkApplication-1.0/roadNetwork/";//Address of RoadNetworkService
-	private static final String bookingAddr = "http://127.0.0.1:8080/MSRoadNetwork/RoadNetworkApplication-1.0/roadNetwork/street?start=16&dest=115239";
-	private static final String vehicleAddr = "";
+	private static final String baseAddress = "http://gateway-optimusbus.router.default.svc.cluster.local/optimusbus";
 	public static enum Method {GET, POST, PUT, DELETE}
 	
 }
