@@ -57,7 +57,15 @@ public class Node {
 		return new Node(id, l, t, pd);
 	}
 	
-	public static Node decodeIntersection(Document d) {
+	public static Node decodeIntersection(Document d, Node.Type type) {
+		if(d.size()==0) return null;
+		Location l = Location.decodeLocation((Document) d.get("coordinate"));
+		String nid = d.getInteger("osmid").toString();
+		double pd = -1;
+		return new Node(nid,l, type, pd);
+	}
+	
+	public static Node decodeIntersection(Document d ) {
 		if(d.size()==0) return null;
 		Location l = Location.decodeLocation((Document) d.get("coordinate"));
 		String nid = d.getInteger("osmid").toString();

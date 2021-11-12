@@ -105,6 +105,7 @@ public class HttpConnector {
 		param.put("dest", dest.toString());
 		return makeRequest(roadNetworkAddr,"street", Method.GET, param, null);
 	}
+	
 	/**
 	 * Request the shortestPath from MSRoadNetwork as a list of Streets
 	 * @param source is the Id of the starting Node

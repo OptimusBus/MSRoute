@@ -71,13 +71,13 @@ public class BestRoute{
 		for (Object j : jap) {
 			String s = j.toString();
 			Document d = Document.parse(s);
-			Node n = Node.decodeIntersection(d);
+			Node n = Node.decodeIntersection(d, Node.Type.PICKUPPOINT);
 			pickups.add(n);
 		}
 		for (Object j : jas) {
 			String s = j.toString();
 			Document d = Document.parse(s);
-			Node n = Node.decodeIntersection(d);
+			Node n = Node.decodeIntersection(d, Node.Type.STANDINGPOINT);
 			standings.add(n);
 		}
 		for (Object j : jav) {

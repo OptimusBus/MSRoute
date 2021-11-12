@@ -1,0 +1,152 @@
+[
+	{
+		"passengerId" : "PA00001", 
+		"username" : "mariorossi",
+		"password" : "12345678",
+		"email" : "mariorossi@email.com",
+		"name" : "Mario",
+		"surname" : "Rossi",
+		"age" : 50,
+		"key" : "123asdf456"
+	},
+	{
+		"passengerId" : "PA00002", 
+		"username" : "giusepperossi",
+		"password" : "12345678",
+		"email" : "giusepperossi@email.com",
+		"name" : "Giuseppe",
+		"surname" : "Rossi",
+		"age" : 20,
+		"key" : "143asdf456"
+	},
+	{
+		"passengerId" : "PA00003", 
+		"username" : "francescorossi",
+		"password" : "12345678",
+		"email" : "frarossi@email.com",
+		"name" : "Franco",
+		"surname" : "Rossi",
+		"age" : 50,
+		"key" : "142asdf456"
+	},
+	{
+		"passengerId" : "PA00004", 
+		"username" : "francorossi",
+		"password" : "12345678",
+		"email" : "francorossi@email.com",
+		"name" : "Franco",
+		"surname" : "Rossi",
+		"age" : 30,
+		"key" : "142afdf456"
+	},
+	{
+		"passengerId" : "PA00005", 
+		"username" : "albertorossi",
+		"password" : "12345678",
+		"email" : "albertorossi@email.com",
+		"name" : "Alberto",
+		"surname" : "Rossi",
+		"age" : 50,
+		"key" : "142dfdf456"
+	},
+	{
+		"passengerId" : "PA00006", 
+		"username" : "mariarossi",
+		"password" : "12345678",
+		"email" : "mariarossi@email.com",
+		"name" : "Maria",
+		"surname" : "Rossi",
+		"age" : 35,
+		"key" : "142dfdf496"
+	},
+	{
+		"passengerId" : "PA00007", 
+		"username" : "peppinarossi",
+		"password" : "12345678",
+		"email" : "peprossi@email.com",
+		"name" : "Peppina",
+		"surname" : "Rossi",
+		"age" : 50,
+		"key" : "142drdf496"
+	},
+	{
+		"passengerId" : "PA00008", 
+		"username" : "mariellarossi",
+		"password" : "12345678",
+		"email" : "mariellarossi@email.com",
+		"name" : "Mariella",
+		"surname" : "Rossi",
+		"age" : 30,
+		"key" : "542drdf496"
+	},
+	{
+		"passengerId" : "PA00009", 
+		"username" : "astrubalenarossi",
+		"password" : "12345678",
+		"email" : "astrurossi@email.com",
+		"name" : "Astrubale",
+		"surname" : "Rossi",
+		"age" : 20,
+		"key" : "542drdy496"
+	},
+	{
+		"passengerId" : "PA00010", 
+		"username" : "danieledavino",
+		"password" : "12345678",
+		"email" : "danieledavino@email.com",
+		"name" : "Daniele",
+		"surname" : "Davino",
+		"age" : 40,
+		"key" : "542dsdy496"
+	},
+	{
+		"passengerId" : "PA00011", 
+		"username" : "aniellocimitile",
+		"password" : "12345678",
+		"email" : "aniellocim@email.com",
+		"name" : "Aniello",
+		"surname" : "Cimitile",
+		"age" : 70,
+		"key" : "r42dsdy496"
+	},
+	{
+		"passengerId" : "PA00012", 
+		"username" : "augustoungolo",
+		"password" : "12345678",
+		"email" : "augustoungolo@email.com",
+		"name" : "Augusto",
+		"surname" : "Ungolo",
+		"age" : 2,
+		"key" : "r42dsdya96"
+	},
+	{
+		"passengerId" : "PA00013", 
+		"username" : "matteobosco",
+		"password" : "12345678",
+		"email" : "matteobosco@email.com",
+		"name" : "Matteo",
+		"surname" : "Bosco",
+		"age" : 92,
+		"key" : "rw2dsdya96"
+	},
+	{
+		"passengerId" : "PA00014", 
+		"username" : "pasqualecavoto",
+		"password" : "12345678",
+		"email" : "pasqualecavoto@email.com",
+		"name" : "Pasquale",
+		"surname" : "Cavoto",
+		"age" : 65,
+		"key" : "rw2dWdya96"
+	},
+	{
+		"passengerId" : "PA00015", 
+		"username" : "aaronvisaggio",
+		"password" : "12345678",
+		"email" : "aaaaaaaron@email.com",
+		"name" : "Aaron",
+		"surname" : "Visaggio",
+		"age" : 50,
+		"key" : "rw2dWdFa96"
+	}
+]
