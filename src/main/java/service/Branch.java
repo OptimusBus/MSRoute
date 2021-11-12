@@ -58,7 +58,6 @@ public class Branch implements BranchLocal {
 	@Override
 	public boolean deleteRoute(String vehicleId) {
 		return mdb.removeRoute(vehicleId);
-		return true;
 	}
 	
 	/**
