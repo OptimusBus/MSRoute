@@ -18,18 +18,32 @@ public class MongoConnector {
 		super();
 	}
 	
+	/**
+	 * Request a Route by the vehicleID form the MongoDB 
+	 * @param vehicleId the id of the vehicle assigned to the Route
+	 * @return a MongoDB Document
+	 */
 	public Document getRouteByVehicleId(String vehicleId) {
 		MongoDatabase db=m.getDatabase("RoutesDB");
 		MongoCollection<Document> coll=db.getCollection("routes");
 		return coll.find(Filters.eq("vehicleId", vehicleId)).first();
 	}
 	
+	/**
+	 * Save a Route object on to the MongoDB
+	 * @param r the Route to be saved
+	 */
 	public void saveRoute(Route r) {
 		MongoDatabase db=m.getDatabase("RoutesDB");
 		MongoCollection<Document> coll=db.getCollection("routes");
 		coll.insertOne(Route.encodeRoute(r));
 	}
 	
+	/**
+	 * Remove a route from MongoDB
+	 * @param vehicleId the id of the vehicle assigned to the Route
+	 * @return  the result of the operation (true if successful or false if failed) 
+	 */
 	public boolean removeRoute(String vehicleId) {
 		MongoDatabase db=m.getDatabase("RoutesDB");
 		MongoCollection<Document> coll=db.getCollection("routes");

@@ -6,13 +6,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.ws.rs.core.Response;
-
 import org.bson.Document;
 import org.json.simple.*;
 import org.json.simple.parser.JSONParser;
 
-import innerconnector.HttpConnector;
 import kmeans.Centroid;
 import kmeans.EuclideanDistance;
 import kmeans.KMeans;
@@ -20,9 +17,16 @@ import kmeans.Record;
 import model.*;
 import service.Branch;
 
+/**
+ * The class implementing the Routing algorithm
+ * @class BestRoute
+ */
 @SuppressWarnings("deprecation")
 public class BestRoute{
 	
+	/**
+	 * Execute the algorithm locally (for testing purpose)
+	 */
 	public static void main(String[] args) {
 		BestRoute m = new BestRoute();
 		try {
@@ -37,6 +41,10 @@ public class BestRoute{
 	
 	public BestRoute() {}
 	
+	/**
+	 * Load example data from files (for testing purpose)
+	 * @throws Exception
+	 */
 	public void loadFiles() throws Exception{
 		String bok = "bookings.json";
 		String veh = "vehicles.json";
@@ -94,10 +102,10 @@ public class BestRoute{
 		}
 	}
 	
-	/*
-	 * https://api.mapbox.com/directions/v5/mapbox/driving/-122.39636,37.79129;-122.39732,37.79283;-122.39606,37.79349?annotations=maxspeed&overview=full&geometries=geojson&access_token=pk.eyJ1Ijoic2Vuc2VsZXNzbWl0ZSIsImEiOiJja3VmbTY0MjcxZXM1MnFtdHYwdW8zZnlmIn0.ou1Jnfl5Yrx60E9aQHNfsg
+	/**
+	 * The algorithm execute a clusterization of the waiting booking to the available vehicle.
+	 * Then he recalculate the Route for each vehicle adding the new Node checking the availability of seats
 	 */
-	
 	public void algo() {
 		Branch branch = new Branch();
 		ArrayList<Node> waitNodes = getWaitingDeparture();
@@ -127,6 +135,12 @@ public class BestRoute{
 		KMeans.saveCluster(clusters, "clusters.json");
 	}
 	
+	/**
+	 * The parallel version of the algorithm to determinate the shortest path for all vehicle
+	 * The algorithm execute a clusterization of the waiting booking to the available vehicle.
+	 * Then he recalculate the Route for each vehicle adding the new Node checking the availability of seats
+	 * @throws InterruptedException
+	 */
 	public void parallelAlgo() throws InterruptedException {
 		List<Node> wn = getWaitingDeparture();
 		ArrayList<Record> records = new ArrayList<>();
@@ -194,15 +208,15 @@ public class BestRoute{
 	private ArrayList<Node> standings = new ArrayList<Node>();
 	private ArrayList<Vehicle> vehicles = new ArrayList<Vehicle>();
 	private ArrayList<Booking> bookings = new ArrayList<Booking>();
-	private static final double MAX_DISTANCE = 999999999999.0;
-	/*
+	
+	/**
 	 * Questa classe implementa il thread per eseguire la costruzione in parallelo dei record utilizzati
 	 * dall'algoritmo di classificazione K-means
 	 * Ogni record è costituito dall'id del nodo e una mappa che contiene la distanza di quel nodo dal veicolo
 	 * @class ParallelPath
 	 */
 	private class ParallelPath extends Thread{
-		/*
+		/**
 		 * Per costruire il thread sono necessari, thread group di riferimento (utilizzato poi per cancellare tutti i thread insieme)
 		 * La lista dei veicoli su cui si effettua la clusterizzazione e il subset di nodi per cui generare i record
 		 * @param tg thread group di riferimento
@@ -218,13 +232,20 @@ public class BestRoute{
 		public List<Vehicle> getVehicle(){
 			return this.vehicles;
 		}
+		
 		public List<Node> getNodes() {
 			return this.nodes;
 		}
+		
+		/**
+		 * Rreturn the subset of Records generating from the thread
+		 * @return an ArrayList<Record>
+		 */
 		public ArrayList<Record> getRecords() {
 			return this.records;
 		}
-		/*
+		
+		/**
 		 * nel metodo run per ogni nodo si esegue un'iterazione.
 		 * Ogni thread ha il proprio oggetto branch per eseguire le richieste ai servizi remoti necessari.
 		 * Le richieste per i nearest node vengono eseguiti una sola volta prima di ripetere il calcolo dello 
