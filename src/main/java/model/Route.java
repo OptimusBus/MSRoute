@@ -25,6 +25,13 @@ public class Route {
 		this.route = route;
 		this.size = route.size();
 		this.vehicleId = vehicleId;
+		this.lenght = lenght;
+	}
+	
+	public Route(String vehicleId, List<Node> route){
+		this.route = route;
+		this.size = route.size();
+		this.vehicleId = vehicleId;
 		this.lenght = 0;
 	}
 	

@@ -274,7 +274,7 @@ public class KMeans {
      * @param filename The name of the file where the data will be stored
      * @return void
      */
-    @SuppressWarnings("deprecation")
+    @SuppressWarnings({ "deprecation", "unchecked" })
 	public static void saveCluster(Map<Centroid, List<Record>> clusters, String filename){
 		// Printing the cluster configuration
     	
@@ -302,4 +302,28 @@ public class KMeans {
 		}
     	
     }
+    
+    /**
+     * Return the clusterization result as a JSON string
+     * @param clusters the cluster to be converted
+     * @return the cluster data as a string
+     */
+    @SuppressWarnings({"unchecked", "deprecation"})
+	public static JSONArray returnCluster(Map<Centroid, List<Record>> clusters) {
+		JSONArray data = new JSONArray();
+    	for(Centroid key : clusters.keySet()) {
+    		List<Record> value = clusters.get(key);
+    		String s = key.getBestValue();
+    		ArrayList<String> nodes = new ArrayList<String>();
+    		for(Record r : value) {
+    			nodes.add(r.getDescription());
+    			JSONObject j = new JSONObject();
+    			j.put("vehicleID",  s);
+    			j.put("departures", nodes);
+    			data.add(j);
+    		}
+    	}
+    	return data;
+    }
+    
 }

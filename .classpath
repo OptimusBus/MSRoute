@@ -36,5 +36,14 @@
 			<attribute name="org.eclipse.jst.component.dependency" value="/WEB-INF/lib"/>
 		</attributes>
 	</classpathentry>
+	<classpathentry kind="lib" path="C:/Users/pasqu/.m2/repository/org/mongodb/mongo-java-driver/3.4.3/mongo-java-driver-3.4.3.jar" sourcepath="C:/Users/pasqu/.m2/repository/org/mongodb/mongo-java-driver/3.4.3/mongo-java-driver-3.4.3-sources.jar">
+		<attributes>
+			<attribute name="maven.pomderived" value="true"/>
+			<attribute name="maven.groupId" value="org.mongodb"/>
+			<attribute name="maven.artifactId" value="mongo-java-driver"/>
+			<attribute name="maven.version" value="3.4.3"/>
+			<attribute name="maven.scope" value="compile"/>
+		</attributes>
+	</classpathentry>
 	<classpathentry kind="output" path="target/classes"/>
 </classpath>
