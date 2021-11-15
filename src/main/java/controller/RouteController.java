@@ -1,13 +1,20 @@
 package controller;
 
+import java.util.List;
+
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Response;
 
+import org.bson.BsonArray;
+
+import algorithm.BestRoute;
+import model.Route;
 import model.Vehicle;
 import service.*;
 
@@ -23,13 +30,15 @@ public class RouteController {
 	@GET
 	@Path("/ok")
 	public Response ok() {
-		return Response.ok("Hello funziono").build();
+		return Response.ok("OK").build();
 	}
 	
 	@GET
-	public Response bestRoute(@QueryParam("fromLat") double fromLat, @QueryParam("fromLong") double fromLong, 
-			@QueryParam("toLat") double toLat, @QueryParam("toLong") double toLong) {
-		return null;
+	@Path("/{id}")
+	public Response getRoute(@PathParam("id") String id) {
+		Route r = branch.getRoute(id);
+		if(r != null)return Response.noContent().entity("No route found for specified id").build();
+		return Response.ok().entity(r).build();
 	}
 	
 	@POST
@@ -44,6 +53,30 @@ public class RouteController {
 		return null;
 	}
 	
+	
+	@GET
+	@Path("/exeBestRoute")
+	public Response executeAlgorithm() {
+		try {
+			List<Route> r = bestRoute.parallelAlgo();
+			if(r == null) return Response.status(500).entity("Error while executing the algoritm").build();
+			branch.saveAllRoute(r);
+			return Response.ok().entity(r).build();
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+			return Response.status(500).entity("Error while executing the algoritm").build();
+		}
+	}
+		
+	@GET
+	@Path("/cluster")
+	public Response getClusterData() {
+		BsonArray b = bestRoute.getClusterResult();
+		if(b != null || b.isEmpty())return Response.noContent().entity("No cluster found").build();
+		return Response.ok().entity(b).build();
+	}
+	
 	private BranchLocal branch = new Branch();
+	private BestRoute bestRoute = new BestRoute();
 	
 }

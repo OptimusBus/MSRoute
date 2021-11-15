@@ -131,23 +131,25 @@ public class HttpConnector {
 	}
 	
 	/**
-	 * Request all the waiting Booking from the MSBooking service
-	 * @return the Response of the service
+	 * Request all booking (with Status different from closed or cancelled)
+	 * @return the response of the service
 	 */
-	public static Response getWaitingBookings() {
-		return null;
+	public static Response getAllWaitingBookings() {
+		return makeRequest("/bookings/waiting", Method.GET, null, null);
 	}
 	
+	public static Response getAllOnBoardBookings(String vehicleId) {
+		return makeRequest("/bookings/onboard/"+vehicleId, Method.GET, null, null);
+	}
 	/**
-	 * Request all the  booking assigned to a Vehicle from MSBooking service
-	 * @param vehicleId
-	 * @return the Response of the service
+	 * Reqeust all active vehicle form Vehicle service
+	 * @return the response of the serivice
 	 */
-	public static Response getBookingsByVehicle(String vehicleId) {
-		return null;
+	public static Response getAllVehicle() {
+		return makeRequest("/vehicles/all", Method.GET, null, null);
 	}
 	
-	private static final String baseAddress = "http://127.0.0.1:8080/MSRoadNetwork/RoadNetworkApplication-1.0";
+	private static final String baseAddress = "http://optimusbus-challenge1.router.default.svc.cluster.local/optimusbus";
 	public static enum Method {GET, POST, PUT, DELETE}
 	
 }

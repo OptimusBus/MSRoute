@@ -157,6 +157,12 @@ public class BestRoute{
 	 * @throws InterruptedException
 	 */
 	public List<Route> parallelAlgo() throws InterruptedException {
+		/*
+		 * Request all resuces from Booking service e Vehicle service
+		 */
+		
+		if(!this.getAllData())return null;
+		
 		List<Node> wn = getWaitingDeparture();
 		ArrayList<Record> records = new ArrayList<>();
 		ThreadGroup tg = new ThreadGroup("records");
@@ -218,9 +224,8 @@ public class BestRoute{
 			}
 			Route r = v.getRoute();
 			if(r != null) {
-				nodes.addAll(r.getRoute());
+				nodes.addAll(this.filterAlreadyVisited(r.getRoute(), v));
 			}
-			nodes = this.removeAlreadyVisited(nodes, v);
 			data.put(v, nodes);
 		}
 		/*
@@ -266,10 +271,24 @@ public class BestRoute{
 		}
 		
 		return routes;
-		//KMeans.saveCluster(clusters, "clusters.json");
 		
 	}
 	
+	/**
+	 * reqeust all data from other service
+	 */
+	private boolean getAllData() {
+		Branch branch = new Branch();
+		vehicles = branch.getAllVehicles();
+		if(vehicles == null)return false;
+		bookings = branch.getAllWaitingBookings();
+		if(bookings == null)return false;
+		for(Vehicle v : vehicles) {
+			onboards.put(v.getVehicleId(), branch.getAllOnBoardBookings(v.getVehicleId()));
+		}
+		return true;
+	}
+
 	/**
 	 * Method to extract the node from Booking object
 	 * @return all the Departure Node for Bookings with status WAITING
@@ -303,37 +322,29 @@ public class BestRoute{
 	 * @param v the Vehicle assigned to the Booking
 	 * @return all the Destination Node for Booking with status ONBOARD assigned to the specified vehicle
 	 */
-	public ArrayList<Node> getOnBoardDestination(Vehicle v){
+	public ArrayList<Node> getOnBoardDestination(List<Booking> ba){
 		ArrayList<Node> onpick = new ArrayList<Node>();
-		for(Booking b : bookings) {
-			if(b.getStatus().equals(Booking.Status.ONBOARD))
-				if(b.getVehicleId().equals(v.getVehicleId()))onpick.add(b.getDestination());
+		for(Booking b : ba) {
+			onpick.add(b.getDestination());
 		}
 		return onpick;
 	}
 	
 	/**
-	 * Method to extract the node already visited by the specified vehicle
-	 * @param v the Vehicle assigned to the Booking
-	 * @return all the Destination already visited by the vehicle
+	 * Method to remove all the node already visited from the vehicle
+	 * @param nodes last route of the vehicle
+	 * @param v the vehicle releted to the route
+	 * @return the filtered list of node
 	 */
-	public ArrayList<Node> getClosedDestination(Vehicle v){
-		ArrayList<Node> closeds = new ArrayList<Node>();
-		for(Booking b : bookings) {
-			if(b.getStatus().equals(Booking.Status.CLOSED));
-				if(b.getVehicleId().equals(v.getVehicleId()))closeds.add(b.getDestination());
-		}
-		return closeds;
-	}
-	
-	public List<Node> removeAlreadyVisited(List<Node> nodes, Vehicle v){
-		List<Node> visited = this.getClosedDestination(v);
-		for(Node n : visited) {
-			if(nodes.contains(n))nodes.remove(n);
+	public List<Node> filterAlreadyVisited(List<Node> nodes, Vehicle v){
+		List<Booking> ba = onboards.get(v.getVehicleId());
+		List<Node> dests = this.getOnBoardDestination(ba);
+		for(Node n : dests) {		
+			if(!nodes.contains(n))nodes.remove(n);
 		}
 		return nodes;
 	}
-	
+
 	/**
 	 * Method to extract the Vehicle from vehicles
 	 * @param id of the vehicle to search
@@ -365,10 +376,11 @@ public class BestRoute{
 	                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (e1, e2) -> e1, LinkedHashMap::new));
 	}
 	
-	private ArrayList<Node> pickups = new ArrayList<Node>();
-	private ArrayList<Node> standings = new ArrayList<Node>();
-	private ArrayList<Vehicle> vehicles = new ArrayList<Vehicle>();
-	private ArrayList<Booking> bookings = new ArrayList<Booking>();
+	private List<Node> pickups = new ArrayList<Node>();
+	private List<Node> standings = new ArrayList<Node>();
+	private List<Vehicle> vehicles = new ArrayList<Vehicle>();
+	private List<Booking> bookings = new ArrayList<Booking>();
+	private Map<String, List<Booking>> onboards = new HashMap<>();
 	private BsonArray clusterResult;
 	
 	/**

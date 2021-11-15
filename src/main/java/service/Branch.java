@@ -130,6 +130,81 @@ public class Branch implements BranchLocal {
 		return path;
 	}
 	
+	/**
+	 * Request all active vehicles from Vehicle service
+	 * @return a list of active Vehicle
+	 */
+	@Override
+	public List<Vehicle> getAllVehicles() {
+		Response r = HttpConnector.getAllVehicle();
+		if(r.getStatus() != 200) return null;
+		BsonArray array = BsonArray.parse(r.readEntity(String.class));
+		Iterator<BsonValue> i = array.iterator();
+		List<Vehicle> va = new ArrayList<>();
+		while(i.hasNext()) {
+			Document d = Document.parse(i.next().toString());
+			Vehicle v = Vehicle.decodeVehicle(d);
+			va.add(v);
+		}
+		return va;
+	}
+	
+	/**
+	 * Request all waiting booking from Booking service
+	 * @return a list of booking
+	 */
+	@Override
+	public List<Booking> getAllWaitingBookings(){
+		Response r = HttpConnector.getAllWaitingBookings();
+		if(r.getStatus() != 200) return null;
+		BsonArray array = BsonArray.parse(r.readEntity(String.class));
+		Iterator<BsonValue> i = array.iterator();
+		List<Booking> ba = new ArrayList<>();
+		while(i.hasNext()) {
+			Document d = Document.parse(i.next().toString());
+			Booking b = Booking.decodeBooking(d);
+			ba.add(b);
+		}
+		return ba;
+	}
+	
+	/**
+	 * Request all onBoard booking for specific vehicle
+	 * @param id of the vehicle
+	 * @return a list of booking
+	 */
+	public List<Booking> getAllOnBoardBookings(String id){
+		Response r = HttpConnector.getAllOnBoardBookings(id);
+		if(r.getStatus() != 200) return null;
+		BsonArray array = BsonArray.parse(r.readEntity(String.class));
+		Iterator<BsonValue> i = array.iterator();
+		List<Booking> ba = new ArrayList<>();
+		while(i.hasNext()) {
+			Document d = Document.parse(i.next().toString());
+			Booking b = Booking.decodeBooking(d);
+			ba.add(b);
+		}
+		return ba;
+	}
+	
+	/**
+	 * Save a list of route on DB. If a route is already present it will be overwritten
+	 * @param routes the list of Route to be saved on DB
+	 * @return
+	 */
+	public void saveAllRoute(List<Route> routes) {
+		for(Route r : routes) {
+			if(mdb.getRouteByVehicleId(r.getVehicleId())== null) {
+				mdb.saveRoute(r);
+			}else {
+				mdb.removeRoute(r.getVehicleId());
+				mdb.saveRoute(r);
+			}
+		}
+	}
+	
 	private MongoConnector mdb = new MongoConnector();
+
+	
 
 }

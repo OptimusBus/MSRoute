@@ -2,9 +2,11 @@ package service;
 
 import java.util.List;
 
+import model.Booking;
 import model.Node;
 import model.Route;
 import model.Street;
+import model.Vehicle;
 
 public interface BranchLocal {
 	
@@ -52,4 +54,30 @@ public interface BranchLocal {
 	 * @return a the shortestPath as a list of Node
 	 */
 	public List<Node> getShortestPath(int start, int dest);
+	
+	/**
+	 * Request all active vehicles from Vehicle service
+	 * @return a list of active Vehicle
+	 */
+	public List<Vehicle> getAllVehicles();
+	
+	/**
+	 * Request all waiting booking from Booking service
+	 * @return a list of booking
+	 */
+	public List<Booking> getAllWaitingBookings();
+	
+	/**
+	 * Request all onBoard booking for specific vehicle
+	 * @param id of the vehicle
+	 * @return a list of booking
+	 */
+	public List<Booking> getAllOnBoardBookings(String id);
+	
+	/**
+	 * Save a list of route on DB. If a route is already present it will be overwritten
+	 * @param routes the list of Route to be saved on DB
+	 * @return
+	 */
+	public void saveAllRoute(List<Route> routes);
 }
