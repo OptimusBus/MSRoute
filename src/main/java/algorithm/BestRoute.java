@@ -21,14 +21,11 @@ import kmeans.KMeans;
 import kmeans.Record;
 import model.*;
 import service.Branch;
-import javax.ejb.Schedule;
-import javax.ejb.Singleton;
 
 /**
  * The class implementing the Routing algorithm
  * @class BestRoute
  */
-@Singleton
 public class BestRoute{
 	
 	/**
@@ -281,7 +278,6 @@ public class BestRoute{
 	 * The algorithm execute a clusterization of the waiting booking to the available vehicle.
 	 * @throws InterruptedException
 	 */
-	@Schedule(hour = "*", minute = "*", second = "*/600")
 	public List<Route> parallelAlgo2() throws InterruptedException {
 		/*
 		 * Request all resuces from Booking service e Vehicle service
