@@ -133,14 +133,15 @@ public class Route {
 	 * @return a Route object
 	 */
 	public static Route decodeRoute(Document d) {
+		if(d == null)return null;
 		if(d.size()==0)return null;
 		String veId = d.getString("vehicleId");
-		int size = d.getInteger("size");
+		int size = 0;
 		ArrayList<Node> route = new ArrayList<Node>();
 		for(int i = 0; i < size; i++) {
 			route.add(Node.decodeNode((Document)d.get(String.valueOf(i))));
 		}
-		double lenght = d.getDouble("lenght");
+		double lenght = 0;
 		return new Route(veId, route, lenght);
 	}
 	
