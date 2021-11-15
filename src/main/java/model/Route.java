@@ -133,7 +133,7 @@ public class Route {
 	 * @return a Route object
 	 */
 	public static Route decodeRoute(Document d) {
-		if(d.size()<0)return null;
+		if(d.size()==0)return new Route();
 		String veId = d.getString("vehicleId");
 		int size = d.getInteger("size");
 		ArrayList<Node> route = new ArrayList<Node>();
