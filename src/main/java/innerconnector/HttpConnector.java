@@ -165,7 +165,7 @@ public class HttpConnector {
 		return makeRequest("/roadNetwork/pickuppoint", Method.GET, null, null);
 	}
 	
-	private static final String baseAddress = "http://optimusbus-challenge1.router.default.svc.cluster.local/optimusbus";
+	private static final String baseAddress = "http://gateway-optimusbus.router.default.svc.cluster.local/optimusbus";
 	public static enum Method {GET, POST, PUT, DELETE}
 	
 	
