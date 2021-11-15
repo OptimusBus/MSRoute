@@ -1,7 +1,9 @@
 package algorithm;
 import javax.ejb.Schedule;
 import javax.ejb.Singleton;
+import javax.enterprise.context.Dependent;
 
+@Dependent
 @Singleton
 public class ScheduledTask {
 	
