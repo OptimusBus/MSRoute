@@ -143,6 +143,14 @@ public class Route {
 		double lenght = d.getDouble("lenght");
 		return new Route(veId, route, lenght);
 	}
+	
+	/**
+	 * Print Route
+	 */
+	public void printRoute() {
+		Document d = Route.encodeRoute(this);
+		System.out.println(d.toJson());
+	}
 
 	private List<Node> route;
 	private String vehicleId;

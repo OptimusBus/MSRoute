@@ -12,6 +12,7 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Response;
 
 import org.bson.BsonArray;
+import org.bson.Document;
 
 import algorithm.BestRoute;
 import model.Route;
@@ -42,23 +43,32 @@ public class RouteController {
 	}
 	
 	@POST
-	@Path("/nearestVehicle")
-	public Response nearestVehicle(Vehicle d) {
-		return null;
+	@Path("/bestVehicle")
+	public Response nearestVehicle(String s) {
+		Document d = Document.parse(s);
+		Vehicle v = Vehicle.decodeVehicle(d);
+		Vehicle best = branch.getNearestVehicle(v);
+		if(best != null)return Response.ok().entity(best.getVehicleId()).build();
+		return Response.status(404).entity("No vehicle found").build();
+		//prendiamo i veicoli disattivati
+		//poi valutiamo quelli che sono occupati
 	}
 	
 	@POST
 	@Path("/bestSP")
-	public Response bestStandingPoint(Vehicle s) {
-		return null;
+	public Response bestStandingPoint(String v) {
+		Document d = Document.parse(v);
+		Vehicle ve = Vehicle.decodeVehicle(d);
+		String s = branch.getBestStandingPoint(ve);
+		if(s != null)return Response.ok().entity(s).build();
+		return Response.status(500).entity("Impossible to find a standig point").build();
 	}
-	
 	
 	@GET
 	@Path("/exeBestRoute")
 	public Response executeAlgorithm() {
 		try {
-			List<Route> r = bestRoute.parallelAlgo();
+			List<Route> r = bestRoute.parallelAlgo2();
 			if(r == null) return Response.status(500).entity("Error while executing the algoritm").build();
 			branch.saveAllRoute(r);
 			return Response.ok().entity(r).build();
@@ -72,7 +82,7 @@ public class RouteController {
 	@Path("/cluster")
 	public Response getClusterData() {
 		BsonArray b = bestRoute.getClusterResult();
-		if(b != null || b.isEmpty())return Response.noContent().entity("No cluster found").build();
+		if(b != null)return Response.noContent().entity("No cluster found").build();
 		return Response.ok().entity(b).build();
 	}
 	

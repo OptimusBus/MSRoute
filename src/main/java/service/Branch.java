@@ -173,6 +173,7 @@ public class Branch implements BranchLocal {
 	 * @param id of the vehicle
 	 * @return a list of booking
 	 */
+	@Override
 	public List<Booking> getAllOnBoardBookings(String id){
 		Response r = HttpConnector.getAllOnBoardBookings(id);
 		if(r.getStatus() != 200) return null;
@@ -192,6 +193,7 @@ public class Branch implements BranchLocal {
 	 * @param routes the list of Route to be saved on DB
 	 * @return
 	 */
+	@Override
 	public void saveAllRoute(List<Route> routes) {
 		for(Route r : routes) {
 			if(mdb.getRouteByVehicleId(r.getVehicleId())== null) {
@@ -201,6 +203,85 @@ public class Branch implements BranchLocal {
 				mdb.saveRoute(r);
 			}
 		}
+	}
+	
+	/**
+	 * Method to calculate the best stending point for given vehicle
+	 * @param v the vehicle that request the standing point
+	 * @return the id of the best stending point
+	 */
+	@Override
+	public String getBestStandingPoint(Vehicle v) {
+		Node nv = this.getNearestNode(v.getLocation().getLatitude(), v.getLocation().getLongitude());
+		Response r = HttpConnector.getStandingPoints();
+		if(r.getStatus()!=200)return null;
+		if(nv == null)return null;
+		BsonArray array = BsonArray.parse(r.readEntity(String.class));
+		Iterator<BsonValue> i = array.iterator();
+		List<Node> standings = new ArrayList<Node>();
+		while(i.hasNext()) {
+			Document d = Document.parse(i.next().toString());
+			Node n = Node.decodeNode(d);
+			standings.add(n);
+		}
+		double min = 9999999999999999999.0;
+		Node bestS = new Node();
+		int start = Integer.parseInt(nv.getNodeId());
+		for(Node n : standings) {
+			int dest = Integer.parseInt(n.getNodeId());
+			double temp = this.getShortestStreet(start, dest);
+			if(temp < min) {
+				min = temp;
+				bestS = n;
+			}
+		}
+		return bestS.getNodeId();
+	}
+	
+	/**
+	 * Method to request the nearest available vehicle
+	 * @param v the vehicle that make the request
+	 * @return the nearest vehicle
+	 */
+	@Override
+	public Vehicle getNearestVehicle(Vehicle v) {
+		List<Vehicle> vehicles = this.getAllVehicles();
+		if(vehicles.contains(v))vehicles.remove(v);
+		Node startNode = this.getNearestNode(v.getLocation().getLatitude(), v.getLocation().getLongitude());
+		if(startNode == null)return null;
+		int start = Integer.parseInt(startNode.getNodeId());
+		double min = 999999999999999999.0;
+		Vehicle best = new Vehicle();
+		for(Vehicle ve : vehicles) {
+			Node d = this.getNearestNode(ve.getLocation().getLatitude(), ve.getLocation().getLongitude());
+			if(d != null) {
+				double temp = this.getShortestStreet(start, Integer.parseInt(d.getNodeId()));
+				if(temp < min) {
+					min = temp;
+					best = ve;
+				}
+			}
+		}
+		return best;
+	}
+	
+	/**
+	 * Method to request all the pickup point from the RoadNetwork Service
+	 * @return the list of PickupPoint
+	 */
+	@Override
+	public List<Node> getAllPickups(){
+		Response r = HttpConnector.getPickupPoints();
+		if(r.getStatus()!=200)return null;
+		BsonArray array = BsonArray.parse(r.readEntity(String.class));
+		Iterator<BsonValue> i = array.iterator();
+		List<Node> pik = new ArrayList<Node>();
+		while(i.hasNext()) {
+			Document d = Document.parse(i.next().toString());
+			Node n = Node.decodeNode(d);
+			if(n!=null)pik.add(n);
+		}
+		return pik;
 	}
 	
 	private MongoConnector mdb = new MongoConnector();

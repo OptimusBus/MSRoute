@@ -149,7 +149,24 @@ public class HttpConnector {
 		return makeRequest("/vehicles/all", Method.GET, null, null);
 	}
 	
+	/**
+	 * Request all the standing point from RoadNetwork service
+	 * @return the Response of the service
+	 */
+	public static Response getStandingPoints() {
+		return makeRequest("/roadNetwork/standingpoint", Method.GET, null, null);
+	}
+	
+	/**
+	 * Request all the standing point from RoadNetwork service
+	 * @return the Response of the service
+	 */
+	public static Response getPickupPoints() {
+		return makeRequest("/roadNetwork/pickuppoint", Method.GET, null, null);
+	}
+	
 	private static final String baseAddress = "http://optimusbus-challenge1.router.default.svc.cluster.local/optimusbus";
 	public static enum Method {GET, POST, PUT, DELETE}
+	
 	
 }

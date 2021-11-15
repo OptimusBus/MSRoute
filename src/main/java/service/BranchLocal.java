@@ -80,4 +80,24 @@ public interface BranchLocal {
 	 * @return
 	 */
 	public void saveAllRoute(List<Route> routes);
+	
+	/**
+	 * Method to calculate the best stending point for given vehicle
+	 * @param v the vehicle that request the standing point
+	 * @return the id of the best stending point
+	 */
+	public String getBestStandingPoint(Vehicle v);
+	
+	/**
+	 * Method to request the nearest available vehicle
+	 * @param v the vehicle that make the request
+	 * @return the nearest vehicle
+	 */
+	public Vehicle getNearestVehicle(Vehicle v);
+	
+	/**
+	 * Method to request all the pickup point from the RoadNetwork Service
+	 * @return the list of PickupPoint
+	 */
+	public List<Node> getAllPickups();
 }
