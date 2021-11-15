@@ -103,7 +103,7 @@ public class Vehicle {
 	public static Vehicle decodeVehicle(Document d) {
 		if(d.size() == 0) return null;
 		String id = d.getString("vehicleId");
-		String sp = d.getInteger("standingPoint").toString();
+		String sp = d.getString("standingPoint");
 		String vts = d.getString("vehicleToSupport");
 		boolean ia = d.getBoolean("isActive", false);
 		int mo = d.getInteger("maxOccupancy", 7);
