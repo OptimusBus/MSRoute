@@ -82,7 +82,9 @@ public class Node {
 		return d;
 	}
 	
-	public boolean equals(Node n) {
+	@Override
+	public boolean equals(Object o) {
+		Node n = (Node)o;
 		if(n.getNodeId().equals(this.nodeId))return true;
 		return false;
 	}
