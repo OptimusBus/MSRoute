@@ -382,6 +382,7 @@ public class BestRoute{
 			for(int j = 0; j < nodes2.size()-1; j++) {
 				int start = Integer.parseInt(nodes2.get(j).getNodeId());
 				int end = Integer.parseInt(nodes2.get(j+1).getNodeId());
+				System.out.println("Requesting shortest path from "+start+" to "+end);
 				List<Node> tempPath = branch.getShortestPath(start, end);
 				if(tempPath!=null)path.addAll(tempPath);
 			}

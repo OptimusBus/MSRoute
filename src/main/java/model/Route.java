@@ -3,6 +3,8 @@ package model;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.xml.bind.annotation.XmlRootElement;
+
 import org.bson.Document;
 /**
  * Implements the Route model for the service
@@ -11,6 +13,7 @@ import org.bson.Document;
  * the List of Node of the route and the lenght of the route
  *@class Route
  */
+@XmlRootElement
 public class Route {
 	
 	public Route(){}
