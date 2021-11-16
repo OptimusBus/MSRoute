@@ -12,7 +12,7 @@ EXPOSE 9990
 
 USER jboss
 
-ADD deployments/MSRoadNetwork.war /opt/jboss/wildfly/standalone/
+ADD deployments/MSRoute.war /opt/jboss/wildfly/standalone/
 
 ENV MULTICONT no
 
