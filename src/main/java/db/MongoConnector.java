@@ -27,7 +27,6 @@ public class MongoConnector {
 		MongoDatabase db=m.getDatabase("RoutesDB");
 		MongoCollection<Document> coll=db.getCollection("routes");
 		Document d =  coll.find(Filters.eq("vehicleId", vehicleId)).first();
-		System.out.println(d.toJson());
 		return d;
 	}
 	
