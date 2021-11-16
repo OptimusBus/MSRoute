@@ -87,7 +87,7 @@ public class RouteController {
 		try {
 			List<Route> r = bestRoute.algo();
 			if(r == null) return Response.status(500).entity("Error while executing the algoritm").build();
-			//branch.saveAllRoute(r);
+			branch.saveAllRoute(r);
 			return Response.ok().entity(r).build();
 		} catch (InterruptedException e) {
 			e.printStackTrace();

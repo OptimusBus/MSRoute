@@ -1,7 +1,10 @@
 package model;
 
+import javax.xml.bind.annotation.XmlRootElement;
+
 import org.bson.Document;
 
+@XmlRootElement
 public class Street {
 	
 	public Street(String id, int from, int to, int speedlimit, String name, double weight, double lenght, double ffs) {

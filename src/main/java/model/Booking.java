@@ -6,14 +6,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 
 import org.bson.Document;
 
-import model.Booking.Status;
-
-
-
 @XmlRootElement
-
-
-
 public class Booking {
 	
 
