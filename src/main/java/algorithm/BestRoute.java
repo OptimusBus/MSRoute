@@ -288,10 +288,7 @@ public class BestRoute{
 		List<Node> wn = getWaitingDeparture();
 		ArrayList<Record> records = new ArrayList<>();
 		ThreadGroup tg = new ThreadGroup("records");
-		ArrayList<ParallelPath> threads = new ArrayList<>();
-		/*
-		 * Generate a sub set of element for each thread
-		 */
+		/*ArrayList<ParallelPath> threads = new ArrayList<>();
 		System.out.println("Starting clusterization");
 		int size = wn.size();
 		System.out.println(wn.size());
@@ -304,21 +301,15 @@ public class BestRoute{
 		List<Node> sub2_1 = sub2.subList(0, (size/2));
 		List<Node> sub2_2 = sub2.subList(size/2, size);
 		
-		/*
-		 * Create 4 thread
-		 */
 		threads.add(new ParallelPath(tg, vehicles, sub1_1));
 		threads.add(new ParallelPath(tg, vehicles, sub1_2));
 		threads.add(new ParallelPath(tg, vehicles, sub2_1));
-		threads.add(new ParallelPath(tg, vehicles, sub2_2));
+		threads.add(new ParallelPath(tg, vehicles, sub2_2));*/
 		
-		for(ParallelPath p : threads) {
-			p.start();	
-		}
-		for(ParallelPath p : threads) {
-			p.join();
-			records.addAll(p.getRecords());
-		}
+		ParallelPath p = new ParallelPath(tg, vehicles, wn);
+		p.start();
+		p.join();
+		records.addAll(p.getRecords());
 		tg.destroy();
 		
 		// Print the recods for the KMeans algorithm
