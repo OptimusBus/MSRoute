@@ -58,7 +58,7 @@ public class HttpConnector {
 		param.put("source", source.toString());
 		param.put("dest", dest.toString());
 		Response r = makeRequest("/roadnetwork/shortestPath", Method.GET, param,  null);
-		System.out.println(r.getStatus());
+		System.out.println("Get Shortest path " + r.getStatus());
 		return r;
 	}
 	

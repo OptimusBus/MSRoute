@@ -335,7 +335,11 @@ public class KMeans {
     		for(Record r : value) {
     			nodes.add(r.getDescription());
     		}
-    		map.put(s, nodes);
+    		if(map.containsKey(s)) {
+    			map.get(s).addAll(nodes);
+    		}else {
+    			map.put(s, nodes);
+    		}
     	}
     	return map;
     }
