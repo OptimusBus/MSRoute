@@ -334,22 +334,20 @@ public class BestRoute{
 		System.out.println("End of clusterization");
 		this.clusterResult = BsonArray.parse(KMeans.returnCluster(clusters).toJSONString());
 		System.out.println(this.clusterResult.toString());
-		Iterator<BsonValue> i = this.clusterResult.iterator();
 		Map<Vehicle, List<Node>> data = new HashMap<>();
-		System.out.println("Starting shortest path");
-		while(i.hasNext()) {
-			JSONParser d = new JSONParser();
-			JSONObject o = (JSONObject) d.parse(i.next().toString());
-			Vehicle v = this.getVehicle(o.get("vehicleID"));
-			System.out.println(o.get("departure"));
-			List<String> nodesId = (List<String>) o.get("departure");
-			List<Node> nodes = new ArrayList<Node>();
-			for(String id : nodesId) {
-				nodes.add(this.getNode(id));
+		Map<String, List<String>> result = KMeans.returnClusterMap(clusters);
+		for(String s : result.keySet()) {
+			List<String> ns = result.get(s);
+			Vehicle v = this.getVehicle(s);
+			List<Node> nodes = new ArrayList<>();
+			for(String nid : ns) {
+				nodes.add(this.getNode(nid));
 			}
 			nodes.addAll(this.getWaitingDestination(nodes));
 			if(v.getRoute()!=null)nodes.addAll(v.getRoute().getRoute());
 		}
+		
+		System.out.println("Starting shortest path");
 		Branch branch = new Branch();
 		List<Route> routes = new ArrayList<>();
 		for(Vehicle v : data.keySet()) {
@@ -487,7 +485,7 @@ public class BestRoute{
 	 * @param object of the vehicle to search
 	 * @return the Vehicle requested or null
 	 */
-	public Vehicle getVehicle(Object object) {
+	public Vehicle getVehicle(String object) {
 		for(Vehicle v : vehicles) {
 			if(object.equals(v.getVehicleId()))return v;
 		}

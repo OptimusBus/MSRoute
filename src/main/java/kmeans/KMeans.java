@@ -326,4 +326,18 @@ public class KMeans {
     	return data;
     }
     
+    public static Map<String, List<String>> returnClusterMap(Map<Centroid, List<Record>> clusters){
+    	Map<String, List<String>> map = new HashMap<String, List<String>>();
+    	for(Centroid key : clusters.keySet()) {
+    		List<Record> value = clusters.get(key);
+    		String s = key.getBestValue();
+    		ArrayList<String> nodes = new ArrayList<String>();
+    		for(Record r : value) {
+    			nodes.add(r.getDescription());
+    		}
+    		map.put(s, nodes);
+    	}
+    	return map;
+    }
+    
 }
