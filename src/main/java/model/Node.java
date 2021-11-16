@@ -85,7 +85,7 @@ public class Node {
 	@Override
 	public boolean equals(Object o) {
 		Node n = (Node)o;
-		if(n.getNodeId().equals(this.nodeId))return true;
+		if(n.getNodeId().equalsIgnoreCase(this.nodeId))return true;
 		return false;
 	}
 

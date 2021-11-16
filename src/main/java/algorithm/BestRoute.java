@@ -185,14 +185,14 @@ public class BestRoute{
 			List<Node> nodes = new ArrayList<>();
 			for(String nid : ns) {
 				Node n = this.getNode(nid);
-				if(!nodes.contains(n))nodes.add(n);
+				if(nodes.indexOf(n) < 0)nodes.add(n);
 			}
 			nodes.addAll(this.getWaitingDestination(nodes));
 			if(v.getRoute()!=null) {
 				Map<Integer, Node> vrt = v.getRoute().getRoute();
 				for(Integer i : vrt.keySet()) {
 					Node n = vrt.get(i);
-					if(!nodes.contains(n))nodes.add(n);
+					if(nodes.indexOf(n) < 0)nodes.add(n);
 				}
 			}
 			data.put(v, nodes);
@@ -203,31 +203,32 @@ public class BestRoute{
 		List<Route> routes = new ArrayList<>();
 		for(Vehicle v : data.keySet()) {
 			List<Node> nodes = data.get(v);
-			Map<Node, Double> wayPoint = new HashMap<>();
+			Map<String, Double> wayPoint = new HashMap<>();
 			for(Node n : nodes) {
 				for(Record r : records) {
 					if(r.getDescription().equals(n.getNodeId())) {
-						wayPoint.put(n, - r.getFeatures().get(v.getVehicleId()));
+						wayPoint.put(n.getNodeId(), - r.getFeatures().get(v.getVehicleId()));
 					}else {
-						wayPoint.put(n, -1.0);
+						wayPoint.put(n.getNodeId(), -1.0);
 					}
 				}
 			}
-			for(Node n : wayPoint.keySet()) {
+			for(String n : wayPoint.keySet()) {
 				double leng = wayPoint.get(n);
 				if(leng <= 0) {
 					System.out.println("Requesting path");
 					int start = Integer.parseInt(
 							branch.getNearestNode(v.getLocation().getLatitude(), v.getLocation().getLongitude()).getNodeId());
-					int end = Integer.parseInt(n.getNodeId());
+					int end = Integer.parseInt(n);
 					wayPoint.put(n, branch.getShortestStreet(start, end ));
 				}
 			}
 			wayPoint = BestRoute.sortedByValue(wayPoint);
 			Map<Integer, Node> nodes2 = new HashMap<Integer, Node>();
 			int i = 0;
-			for(Node n : wayPoint.keySet()) {
-				nodes2.put(i, n);
+			for(String n : wayPoint.keySet()) {
+				
+				nodes2.put(i, this.getNode(n));
 				i++;
 			}
 			Route r = new Route(v.getVehicleId(), nodes2);
@@ -539,7 +540,7 @@ public class BestRoute{
 		for(Node n : nodes) {
 			for(Booking b : bookings) {
 				if(b.getDeparture().getNodeId().equals(n.getNodeId())){
-					if(!waitpick.contains(b.getDestination()))waitpick.add(b.getDestination());
+					if(waitpick.indexOf(b.getDestination()) < 0)waitpick.add(b.getDestination());
 				}
 			}
 		}
@@ -569,7 +570,7 @@ public class BestRoute{
 		List<Booking> ba = onboards.get(v.getVehicleId());
 		List<Node> dests = this.getOnBoardDestination(ba);
 		for(Node n : dests) {		
-			if(!nodes.contains(n))nodes.remove(n);
+			if(nodes.indexOf(n) < 0)nodes.remove(n);
 		}
 		return nodes;
 	}
@@ -598,10 +599,10 @@ public class BestRoute{
 		return null;
 	}
 	
-	public static Map<Node, Double> sortedByValue(Map<Node, Double> map){
-		 return map.entrySet()
+	public static Map<String, Double> sortedByValue(Map<String, Double> wayPoint){
+		 return wayPoint.entrySet()
 	                .stream()
-	                .sorted((Map.Entry.<Node, Double>comparingByValue().reversed()))
+	                .sorted((Map.Entry.<String, Double>comparingByValue().reversed()))
 	                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (e1, e2) -> e1, LinkedHashMap::new));
 	}
 	
