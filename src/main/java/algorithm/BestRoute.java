@@ -338,6 +338,7 @@ public class BestRoute{
 		while(i.hasNext()) {
 			Document d = Document.parse(i.next().toString());
 			Vehicle v = this.getVehicle(d.getString("vehicleID"));
+			System.out.println(d.get("departure"));
 			List<String> nodesId = (List<String>) d.get("departure");
 			List<Node> nodes = new ArrayList<Node>();
 			for(String id : nodesId) {
