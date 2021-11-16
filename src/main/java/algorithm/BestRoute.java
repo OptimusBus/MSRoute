@@ -14,6 +14,7 @@ import org.bson.BsonValue;
 import org.bson.Document;
 import org.json.simple.*;
 import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
 
 import kmeans.Centroid;
 import kmeans.EuclideanDistance;
@@ -277,8 +278,9 @@ public class BestRoute{
 	 * The parallel version of the algorithm to determinate the shortest path for all vehicle
 	 * The algorithm execute a clusterization of the waiting booking to the available vehicle.
 	 * @throws InterruptedException
+	 * @throws ParseException 
 	 */
-	public List<Route> parallelAlgo2() throws InterruptedException {
+	public List<Route> parallelAlgo2() throws InterruptedException, ParseException {
 		/*
 		 * Request all resuces from Booking service e Vehicle service
 		 */
@@ -336,10 +338,11 @@ public class BestRoute{
 		Map<Vehicle, List<Node>> data = new HashMap<>();
 		System.out.println("Starting shortest path");
 		while(i.hasNext()) {
-			Document d = Document.parse(i.next().toString());
-			Vehicle v = this.getVehicle(d.getString("vehicleID"));
-			System.out.println(d.get("departure"));
-			List<String> nodesId = (List<String>) d.get("departure");
+			JSONParser d = new JSONParser();
+			JSONObject o = (JSONObject) d.parse(i.next().toString());
+			Vehicle v = this.getVehicle(o.get("vehicleID"));
+			System.out.println(o.get("departure"));
+			List<String> nodesId = (List<String>) o.get("departure");
 			List<Node> nodes = new ArrayList<Node>();
 			for(String id : nodesId) {
 				nodes.add(this.getNode(id));
@@ -481,12 +484,12 @@ public class BestRoute{
 
 	/**
 	 * Method to extract the Vehicle from vehicles
-	 * @param id of the vehicle to search
+	 * @param object of the vehicle to search
 	 * @return the Vehicle requested or null
 	 */
-	public Vehicle getVehicle(String id) {
+	public Vehicle getVehicle(Object object) {
 		for(Vehicle v : vehicles) {
-			if(id.equals(v.getVehicleId()))return v;
+			if(object.equals(v.getVehicleId()))return v;
 		}
 		return null;
 	}
