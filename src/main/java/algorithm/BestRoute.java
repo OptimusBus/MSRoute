@@ -345,6 +345,7 @@ public class BestRoute{
 			}
 			nodes.addAll(this.getWaitingDestination(nodes));
 			if(v.getRoute()!=null)nodes.addAll(v.getRoute().getRoute());
+			data.put(v, nodes);
 		}
 		
 		System.out.println("Starting shortest path");
