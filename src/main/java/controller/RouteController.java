@@ -13,6 +13,7 @@ import javax.ws.rs.core.Response;
 
 import org.bson.BsonArray;
 import org.bson.Document;
+import org.json.simple.parser.ParseException;
 
 import algorithm.BestRoute;
 import model.Route;
@@ -75,6 +76,8 @@ public class RouteController {
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 			return Response.status(500).entity("Error while executing the algoritm").build();
+		} catch(ParseException e) {
+			return Response.status(500).entity("Error while parsing").build();
 		}
 	}
 		
