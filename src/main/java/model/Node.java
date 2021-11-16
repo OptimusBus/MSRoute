@@ -81,6 +81,11 @@ public class Node {
 		d.append("type", n.getType().toString());
 		return d;
 	}
+	
+	public boolean equals(Node n) {
+		if(n.getNodeId().equals(this.nodeId))return true;
+		return false;
+	}
 
 	private Location location;
 	private String nodeId;

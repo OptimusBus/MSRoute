@@ -36,7 +36,7 @@ public class BestRoute{
 		BestRoute m = new BestRoute();
 		try {
 			m.loadFiles();
-			m.parallelAlgo();
+			m.algo();
 			//m.algo();
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
@@ -188,7 +188,13 @@ public class BestRoute{
 				if(!nodes.contains(n))nodes.add(n);
 			}
 			nodes.addAll(this.getWaitingDestination(nodes));
-			if(v.getRoute()!=null)nodes.addAll(v.getRoute().getRoute());
+			if(v.getRoute()!=null) {
+				Map<Integer, Node> vrt = v.getRoute().getRoute();
+				for(Integer i : vrt.keySet()) {
+					Node n = vrt.get(i);
+					if(!nodes.contains(n))nodes.add(n);
+				}
+			}
 			data.put(v, nodes);
 		}
 		
@@ -218,9 +224,11 @@ public class BestRoute{
 				}
 			}
 			wayPoint = BestRoute.sortedByValue(wayPoint);
-			List<Node> nodes2 = new ArrayList<Node>();
+			Map<Integer, Node> nodes2 = new HashMap<Integer, Node>();
+			int i = 0;
 			for(Node n : wayPoint.keySet()) {
-				if(!nodes2.contains(n))nodes2.add(n);
+				nodes2.put(i, n);
+				i++;
 			}
 			Route r = new Route(v.getVehicleId(), nodes2);
 			routes.add(r);
@@ -239,247 +247,247 @@ public class BestRoute{
 	 * Then he recalculate the Route for each vehicle adding the new Node checking the availability of seats
 	 * @throws InterruptedException
 	 */
-	public List<Route> parallelAlgo() throws InterruptedException {
-		/*
-		 * Request all resuces from Booking service e Vehicle service
-		 */
-		
-		if(!this.getAllData())return null;
-		
-		List<Node> wn = getWaitingDeparture();
-		ArrayList<Record> records = new ArrayList<>();
-		ThreadGroup tg = new ThreadGroup("records");
-		ArrayList<ParallelPath> threads = new ArrayList<>();
-		/*
-		 * Generate a sub set of element for each thread
-		 */
-		int size = wn.size();
-		List<Node> sub1 = wn.subList(0, (size/2));
-		List<Node> sub2 = wn.subList(size/2, size);
-		size = sub1.size();
-		List<Node> sub1_1 = sub1.subList(0, (size/2));
-		List<Node> sub1_2 = sub1.subList(size/2, size);
-		size = sub2.size();
-		List<Node> sub2_1 = sub2.subList(0, (size/2));
-		List<Node> sub2_2 = sub2.subList(size/2, size);
-		
-		/*
-		 * Create 4 thread
-		 */
-		threads.add(new ParallelPath(tg, vehicles, sub1_1));
-		threads.add(new ParallelPath(tg, vehicles, sub1_2));
-		threads.add(new ParallelPath(tg, vehicles, sub2_1));
-		threads.add(new ParallelPath(tg, vehicles, sub2_2));
-		
-		for(ParallelPath p : threads) {
-			p.start();
-			p.join();
-			records.addAll(p.getRecords());
-		}
-		tg.destroy();
-		
-		// Print the recods for the KMeans algorithm
-		for (Record r  : records) {
-			System.out.println("Node: "+r.getDescription());
-			for(String s : r.getFeatures().keySet()) {
-				System.out.println("\t"+s+": "+r.getFeatures().get(s));
-			}
-		}
-		//execute the clusterization
-		Map<Centroid, List<Record>> clusters = KMeans.fit(records, vehicles.size(), new EuclideanDistance(), 20);
-		KMeans.printCluster(clusters);
-		/*
-		 * With the result of the clusterization now the new route for the vehicle will be calculated
-		 * First a map containing the vehicle and all the nodes assigned to it is constructed.
-		 * The map (data) contains all the node assigned to the vehicle from the clusterization and all the node
-		 * present in the old route of the vehicle that the vehicle hasn't visited
-		 */
-		this.clusterResult = BsonArray.parse(KMeans.returnCluster(clusters).toJSONString());
-		Iterator<BsonValue> i = this.clusterResult.iterator();
-		Map<Vehicle, List<Node>> data = new HashMap<>();
-		while(i.hasNext()) {
-			Document d = Document.parse(i.next().toString());
-			Vehicle v = this.getVehicle(d.getString("vehicleId"));
-			List<String> nodesId = (List<String>) d.get("departure");
-			List<Node> nodes = new ArrayList<Node>();
-			for(String id : nodesId) {
-				nodes.add(this.getNode(id));
-			}
-			Route r = v.getRoute();
-			if(r != null) {
-				nodes.addAll(this.filterAlreadyVisited(r.getRoute(), v));
-			}
-			data.put(v, nodes);
-		}
-		/*
-		 * Calcoliamo gli shortest path per i nodi assegnati al veicolo
-		 * Per non ricalcolare quelli già presi per i nodi da clusterizzare li ho presi dai record creati per il cluster
-		 * Quelli che facevano parte già della route del veicolo invece facciamo lo shortest path
-		 * 
-		 * Per allegerire la cosa avevo pensato di sgravare il server da calcolare lo shortest path totale e assegnare
-		 * alla route del veicolo solo i waypoint ordinati per distanza e lasciare al client il compito di tracciare il
-		 * path totale
-		 * 
-		 */
-		Branch branch = new Branch();
-		List<Route> routes = new ArrayList<>();
-		for(Vehicle v : data.keySet()) {
-			List<Node> nodes = data.get(v);
-			Map<Node, Double> wayPoint = new HashMap<>();
-			for(Node n : nodes) {
-				for(Record r : records) {
-					if(r.getDescription().equals(n.getNodeId())) {
-						wayPoint.put(n, - r.getFeatures().get(v.getVehicleId()));
-					}else {
-						wayPoint.put(n, -1.0);
-					}
-				}
-			}
-			for(Node n : wayPoint.keySet()) {
-				double leng = wayPoint.get(n);
-				if(leng <= 0) {
-					int start = Integer.parseInt(
-							branch.getNearestNode(v.getLocation().getLatitude(), v.getLocation().getLongitude()).getNodeId());
-					int end = Integer.parseInt(n.getNodeId());
-					wayPoint.put(n, branch.getShortestStreet(start, end ));
-				}
-			}
-			wayPoint = BestRoute.sortedByValue(wayPoint);
-			List<Node> nodes2 = new ArrayList<Node>();
-			for(Node n : wayPoint.keySet()) {
-				nodes2.add(n);
-			}
-			Route r = new Route(v.getVehicleId(), nodes2);
-			routes.add(r);
-		}
-		
-		return routes;
-		
-	}
-	
-	/**
-	 * The parallel version of the algorithm to determinate the shortest path for all vehicle
-	 * The algorithm execute a clusterization of the waiting booking to the available vehicle.
-	 * @throws InterruptedException
-	 * @throws ParseException 
-	 */
-	public List<Route> parallelAlgo2() throws InterruptedException, ParseException {
-		/*
-		 * Request all resuces from Booking service e Vehicle service
-		 */
-		
-		if(!this.getAllData())return null;
-		System.out.println("Data retrived from servicies");
-		List<Node> wn = getWaitingDeparture();
-		ArrayList<Record> records = new ArrayList<>();
-		ThreadGroup tg = new ThreadGroup("records");
-		/*ArrayList<ParallelPath> threads = new ArrayList<>();
-		System.out.println("Starting clusterization");
-		int size = wn.size();
-		System.out.println(wn.size());
-		List<Node> sub1 = wn.subList(0, (size/2));
-		List<Node> sub2 = wn.subList(size/2, size);
-		size = sub1.size();
-		List<Node> sub1_1 = sub1.subList(0, (size/2));
-		List<Node> sub1_2 = sub1.subList(size/2, size);
-		size = sub2.size();
-		List<Node> sub2_1 = sub2.subList(0, (size/2));
-		List<Node> sub2_2 = sub2.subList(size/2, size);
-		
-		threads.add(new ParallelPath(tg, vehicles, sub1_1));
-		threads.add(new ParallelPath(tg, vehicles, sub1_2));
-		threads.add(new ParallelPath(tg, vehicles, sub2_1));
-		threads.add(new ParallelPath(tg, vehicles, sub2_2));*/
-		
-		ParallelPath p = new ParallelPath(tg, vehicles, wn);
-		p.start();
-		p.join();
-		records.addAll(p.getRecords());
-		tg.destroy();
-		
-		// Print the recods for the KMeans algorithm
-		for (Record r  : records) {
-			System.out.println("Node: "+r.getDescription());
-			for(String s : r.getFeatures().keySet()) {
-				System.out.println("\t"+s+": "+r.getFeatures().get(s));
-			}
-		}
-		//execute the clusterization
-		if(records.isEmpty())return null;
-		Map<Centroid, List<Record>> clusters = KMeans.fit(records, vehicles.size(), new EuclideanDistance(), 20);
-		KMeans.printCluster(clusters);
-		/*
-		 * With the result of the clusterization now the new route for the vehicle will be calculated
-		 * First a map containing the vehicle and all the nodes assigned to it is constructed.
-		 * The map (data) contains all the node assigned to the vehicle from the clusterization and all the node
-		 * present in the old route of the vehicle that the vehicle hasn't visited
-		 */
-		System.out.println("End of clusterization");
-		this.clusterResult = BsonArray.parse(KMeans.returnCluster(clusters).toJSONString());
-		System.out.println(this.clusterResult.toString());
-		Map<Vehicle, List<Node>> data = new HashMap<>();
-		Map<String, List<String>> result = KMeans.returnClusterMap(clusters);
-		for(String s : result.keySet()) {
-			List<String> ns = result.get(s);
-			Vehicle v = this.getVehicle(s);
-			List<Node> nodes = new ArrayList<>();
-			for(String nid : ns) {
-				nodes.add(this.getNode(nid));
-			}
-			nodes.addAll(this.getWaitingDestination(nodes));
-			if(v.getRoute()!=null)nodes.addAll(v.getRoute().getRoute());
-			data.put(v, nodes);
-		}
-		
-		System.out.println("Starting shortest path");
-		Branch branch = new Branch();
-		List<Route> routes = new ArrayList<>();
-		for(Vehicle v : data.keySet()) {
-			List<Node> nodes = data.get(v);
-			Map<Node, Double> wayPoint = new HashMap<>();
-			for(Node n : nodes) {
-				for(Record r : records) {
-					if(r.getDescription().equals(n.getNodeId())) {
-						wayPoint.put(n, - r.getFeatures().get(v.getVehicleId()));
-					}else {
-						wayPoint.put(n, -1.0);
-					}
-				}
-			}
-			for(Node n : wayPoint.keySet()) {
-				double leng = wayPoint.get(n);
-				if(leng <= 0) {
-					System.out.println("Requesting path");
-					int start = Integer.parseInt(
-							branch.getNearestNode(v.getLocation().getLatitude(), v.getLocation().getLongitude()).getNodeId());
-					int end = Integer.parseInt(n.getNodeId());
-					wayPoint.put(n, branch.getShortestStreet(start, end ));
-				}
-			}
-			wayPoint = BestRoute.sortedByValue(wayPoint);
-			List<Node> nodes2 = new ArrayList<Node>();
-			for(Node n : wayPoint.keySet()) {
-				nodes2.add(n);
-			}
-			List<Node> path = new ArrayList<Node>();
-			for(int j = 0; j < nodes2.size()-1; j++) {
-				int start = Integer.parseInt(nodes2.get(j).getNodeId());
-				int end = Integer.parseInt(nodes2.get(j+1).getNodeId());
-				System.out.println("Requesting shortest path from "+start+" to "+end);
-				List<Node> tempPath = branch.getShortestPath(start, end);
-				if(tempPath!=null)path.addAll(tempPath);
-			}
-			Route r = new Route(v.getVehicleId(), path);
-			routes.add(r);
-		}
-		//branch.saveAllRoute(routes);
-		System.out.println("END");
-		for(Route r : routes) {
-			r.printRoute();
-		}
-		return routes;	
-	}
-	
+//	public List<Route> parallelAlgo() throws InterruptedException {
+//		/*
+//		 * Request all resuces from Booking service e Vehicle service
+//		 */
+//		
+//		if(!this.getAllData())return null;
+//		
+//		List<Node> wn = getWaitingDeparture();
+//		ArrayList<Record> records = new ArrayList<>();
+//		ThreadGroup tg = new ThreadGroup("records");
+//		ArrayList<ParallelPath> threads = new ArrayList<>();
+//		/*
+//		 * Generate a sub set of element for each thread
+//		 */
+//		int size = wn.size();
+//		List<Node> sub1 = wn.subList(0, (size/2));
+//		List<Node> sub2 = wn.subList(size/2, size);
+//		size = sub1.size();
+//		List<Node> sub1_1 = sub1.subList(0, (size/2));
+//		List<Node> sub1_2 = sub1.subList(size/2, size);
+//		size = sub2.size();
+//		List<Node> sub2_1 = sub2.subList(0, (size/2));
+//		List<Node> sub2_2 = sub2.subList(size/2, size);
+//		
+//		/*
+//		 * Create 4 thread
+//		 */
+//		threads.add(new ParallelPath(tg, vehicles, sub1_1));
+//		threads.add(new ParallelPath(tg, vehicles, sub1_2));
+//		threads.add(new ParallelPath(tg, vehicles, sub2_1));
+//		threads.add(new ParallelPath(tg, vehicles, sub2_2));
+//		
+//		for(ParallelPath p : threads) {
+//			p.start();
+//			p.join();
+//			records.addAll(p.getRecords());
+//		}
+//		tg.destroy();
+//		
+//		// Print the recods for the KMeans algorithm
+//		for (Record r  : records) {
+//			System.out.println("Node: "+r.getDescription());
+//			for(String s : r.getFeatures().keySet()) {
+//				System.out.println("\t"+s+": "+r.getFeatures().get(s));
+//			}
+//		}
+//		//execute the clusterization
+//		Map<Centroid, List<Record>> clusters = KMeans.fit(records, vehicles.size(), new EuclideanDistance(), 20);
+//		KMeans.printCluster(clusters);
+//		/*
+//		 * With the result of the clusterization now the new route for the vehicle will be calculated
+//		 * First a map containing the vehicle and all the nodes assigned to it is constructed.
+//		 * The map (data) contains all the node assigned to the vehicle from the clusterization and all the node
+//		 * present in the old route of the vehicle that the vehicle hasn't visited
+//		 */
+//		this.clusterResult = BsonArray.parse(KMeans.returnCluster(clusters).toJSONString());
+//		Iterator<BsonValue> i = this.clusterResult.iterator();
+//		Map<Vehicle, List<Node>> data = new HashMap<>();
+//		while(i.hasNext()) {
+//			Document d = Document.parse(i.next().toString());
+//			Vehicle v = this.getVehicle(d.getString("vehicleId"));
+//			List<String> nodesId = (List<String>) d.get("departure");
+//			List<Node> nodes = new ArrayList<Node>();
+//			for(String id : nodesId) {
+//				nodes.add(this.getNode(id));
+//			}
+//			Route r = v.getRoute();
+//			if(r != null) {
+//				nodes.addAll(this.filterAlreadyVisited(r.getRoute(), v));
+//			}
+//			data.put(v, nodes);
+//		}
+//		/*
+//		 * Calcoliamo gli shortest path per i nodi assegnati al veicolo
+//		 * Per non ricalcolare quelli già presi per i nodi da clusterizzare li ho presi dai record creati per il cluster
+//		 * Quelli che facevano parte già della route del veicolo invece facciamo lo shortest path
+//		 * 
+//		 * Per allegerire la cosa avevo pensato di sgravare il server da calcolare lo shortest path totale e assegnare
+//		 * alla route del veicolo solo i waypoint ordinati per distanza e lasciare al client il compito di tracciare il
+//		 * path totale
+//		 * 
+//		 */
+//		Branch branch = new Branch();
+//		List<Route> routes = new ArrayList<>();
+//		for(Vehicle v : data.keySet()) {
+//			List<Node> nodes = data.get(v);
+//			Map<Node, Double> wayPoint = new HashMap<>();
+//			for(Node n : nodes) {
+//				for(Record r : records) {
+//					if(r.getDescription().equals(n.getNodeId())) {
+//						wayPoint.put(n, - r.getFeatures().get(v.getVehicleId()));
+//					}else {
+//						wayPoint.put(n, -1.0);
+//					}
+//				}
+//			}
+//			for(Node n : wayPoint.keySet()) {
+//				double leng = wayPoint.get(n);
+//				if(leng <= 0) {
+//					int start = Integer.parseInt(
+//							branch.getNearestNode(v.getLocation().getLatitude(), v.getLocation().getLongitude()).getNodeId());
+//					int end = Integer.parseInt(n.getNodeId());
+//					wayPoint.put(n, branch.getShortestStreet(start, end ));
+//				}
+//			}
+//			wayPoint = BestRoute.sortedByValue(wayPoint);
+//			List<Node> nodes2 = new ArrayList<Node>();
+//			for(Node n : wayPoint.keySet()) {
+//				nodes2.add(n);
+//			}
+//			Route r = new Route(v.getVehicleId(), nodes2);
+//			routes.add(r);
+//		}
+//		
+//		return routes;
+//		
+//	}
+//	
+//	/**
+//	 * The parallel version of the algorithm to determinate the shortest path for all vehicle
+//	 * The algorithm execute a clusterization of the waiting booking to the available vehicle.
+//	 * @throws InterruptedException
+//	 * @throws ParseException 
+//	 */
+//	public List<Route> parallelAlgo2() throws InterruptedException, ParseException {
+//		/*
+//		 * Request all resuces from Booking service e Vehicle service
+//		 */
+//		
+//		if(!this.getAllData())return null;
+//		System.out.println("Data retrived from servicies");
+//		List<Node> wn = getWaitingDeparture();
+//		ArrayList<Record> records = new ArrayList<>();
+//		ThreadGroup tg = new ThreadGroup("records");
+//		/*ArrayList<ParallelPath> threads = new ArrayList<>();
+//		System.out.println("Starting clusterization");
+//		int size = wn.size();
+//		System.out.println(wn.size());
+//		List<Node> sub1 = wn.subList(0, (size/2));
+//		List<Node> sub2 = wn.subList(size/2, size);
+//		size = sub1.size();
+//		List<Node> sub1_1 = sub1.subList(0, (size/2));
+//		List<Node> sub1_2 = sub1.subList(size/2, size);
+//		size = sub2.size();
+//		List<Node> sub2_1 = sub2.subList(0, (size/2));
+//		List<Node> sub2_2 = sub2.subList(size/2, size);
+//		
+//		threads.add(new ParallelPath(tg, vehicles, sub1_1));
+//		threads.add(new ParallelPath(tg, vehicles, sub1_2));
+//		threads.add(new ParallelPath(tg, vehicles, sub2_1));
+//		threads.add(new ParallelPath(tg, vehicles, sub2_2));*/
+//		
+//		ParallelPath p = new ParallelPath(tg, vehicles, wn);
+//		p.start();
+//		p.join();
+//		records.addAll(p.getRecords());
+//		tg.destroy();
+//		
+//		// Print the recods for the KMeans algorithm
+//		for (Record r  : records) {
+//			System.out.println("Node: "+r.getDescription());
+//			for(String s : r.getFeatures().keySet()) {
+//				System.out.println("\t"+s+": "+r.getFeatures().get(s));
+//			}
+//		}
+//		//execute the clusterization
+//		if(records.isEmpty())return null;
+//		Map<Centroid, List<Record>> clusters = KMeans.fit(records, vehicles.size(), new EuclideanDistance(), 20);
+//		KMeans.printCluster(clusters);
+//		/*
+//		 * With the result of the clusterization now the new route for the vehicle will be calculated
+//		 * First a map containing the vehicle and all the nodes assigned to it is constructed.
+//		 * The map (data) contains all the node assigned to the vehicle from the clusterization and all the node
+//		 * present in the old route of the vehicle that the vehicle hasn't visited
+//		 */
+//		System.out.println("End of clusterization");
+//		this.clusterResult = BsonArray.parse(KMeans.returnCluster(clusters).toJSONString());
+//		System.out.println(this.clusterResult.toString());
+//		Map<Vehicle, List<Node>> data = new HashMap<>();
+//		Map<String, List<String>> result = KMeans.returnClusterMap(clusters);
+//		for(String s : result.keySet()) {
+//			List<String> ns = result.get(s);
+//			Vehicle v = this.getVehicle(s);
+//			List<Node> nodes = new ArrayList<>();
+//			for(String nid : ns) {
+//				nodes.add(this.getNode(nid));
+//			}
+//			nodes.addAll(this.getWaitingDestination(nodes));
+//			if(v.getRoute()!=null)nodes.addAll(v.getRoute().getRoute());
+//			data.put(v, nodes);
+//		}
+//		
+//		System.out.println("Starting shortest path");
+//		Branch branch = new Branch();
+//		List<Route> routes = new ArrayList<>();
+//		for(Vehicle v : data.keySet()) {
+//			List<Node> nodes = data.get(v);
+//			Map<Node, Double> wayPoint = new HashMap<>();
+//			for(Node n : nodes) {
+//				for(Record r : records) {
+//					if(r.getDescription().equals(n.getNodeId())) {
+//						wayPoint.put(n, - r.getFeatures().get(v.getVehicleId()));
+//					}else {
+//						wayPoint.put(n, -1.0);
+//					}
+//				}
+//			}
+//			for(Node n : wayPoint.keySet()) {
+//				double leng = wayPoint.get(n);
+//				if(leng <= 0) {
+//					System.out.println("Requesting path");
+//					int start = Integer.parseInt(
+//							branch.getNearestNode(v.getLocation().getLatitude(), v.getLocation().getLongitude()).getNodeId());
+//					int end = Integer.parseInt(n.getNodeId());
+//					wayPoint.put(n, branch.getShortestStreet(start, end ));
+//				}
+//			}
+//			wayPoint = BestRoute.sortedByValue(wayPoint);
+//			List<Node> nodes2 = new ArrayList<Node>();
+//			for(Node n : wayPoint.keySet()) {
+//				nodes2.add(n);
+//			}
+//			List<Node> path = new ArrayList<Node>();
+//			for(int j = 0; j < nodes2.size()-1; j++) {
+//				int start = Integer.parseInt(nodes2.get(j).getNodeId());
+//				int end = Integer.parseInt(nodes2.get(j+1).getNodeId());
+//				System.out.println("Requesting shortest path from "+start+" to "+end);
+//				List<Node> tempPath = branch.getShortestPath(start, end);
+//				if(tempPath!=null)path.addAll(tempPath);
+//			}
+//			Route r = new Route(v.getVehicleId(), path);
+//			routes.add(r);
+//		}
+//		//branch.saveAllRoute(routes);
+//		System.out.println("END");
+//		for(Route r : routes) {
+//			r.printRoute();
+//		}
+//		return routes;	
+//	}
+//	
 	/**
 	 * reqeust all data from other service
 	 */

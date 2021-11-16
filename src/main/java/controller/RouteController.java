@@ -66,22 +66,6 @@ public class RouteController {
 	}
 	
 	@GET
-	@Path("/exeBestRoute1")
-	public Response executeAlgorithm() {
-		try {
-			List<Route> r = bestRoute.parallelAlgo2();
-			if(r == null) return Response.status(500).entity("Error while executing the algoritm").build();
-			//branch.saveAllRoute(r);
-			return Response.ok(r).build();
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-			return Response.status(500).entity("Error while executing the algoritm").build();
-		} catch(ParseException e) {
-			return Response.status(500).entity("Error while parsing").build();
-		}
-	}
-	
-	@GET
 	@Path("/exeBestRoute")
 	public Response executeAlgorithm1() {
 		try {

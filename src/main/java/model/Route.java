@@ -1,7 +1,9 @@
 package model;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.xml.bind.annotation.XmlRootElement;
 
@@ -24,14 +26,14 @@ public class Route {
 	 * @param route the List of Node of the route
 	 * @param lenght the lenght of the route
 	 */
-	public Route(String vehicleId, List<Node> route, double lenght){
+	public Route(String vehicleId, Map<Integer, Node> route, double lenght){
 		this.route = route;
 		this.size = route.size();
 		this.vehicleId = vehicleId;
 		this.lenght = lenght;
 	}
 	
-	public Route(String vehicleId, List<Node> route){
+	public Route(String vehicleId, Map<Integer, Node> route){
 		this.route = route;
 		this.size = route.size();
 		this.vehicleId = vehicleId;
@@ -77,7 +79,7 @@ public class Route {
 	 * Get the List of Node inside the Route
 	 * @return a List<Node>
 	 */
-	public List<Node> getRoute() {
+	public Map<Integer, Node> getRoute() {
 		return this.route;
 	}
 
@@ -85,7 +87,7 @@ public class Route {
 	 * Set the List of Node for the route
 	 * @param route the new List of Node
 	 */
-	public void setRoute(List<Node> route) {
+	public void setRoute(Map<Integer, Node> route) {
 		this.route = route;
 		this.size = this.route.size();
 	}
@@ -124,8 +126,8 @@ public class Route {
 		d.append("size", r.getSize());
 		d.append("lenght", r.getLenght());
 		int i = 0;
-		for(Node n : r.getRoute()) {
-			d.append(String.valueOf(i), Node.encodeNode(n));
+		for(Integer n : r.getRoute().keySet()) {
+			d.append(String.valueOf(i), Node.encodeNode(r.getRoute().get(n)));
 			i++;
 		}
 		return d;
@@ -142,9 +144,9 @@ public class Route {
 		String veId = d.getString("vehicleId");
 		int size = 0;
 		if(d.getInteger("size")!=null)size = d.getInteger("size");
-		ArrayList<Node> path = new ArrayList<Node>();
+		Map<Integer, Node> path = new HashMap<>();
 		for(int i = 0; i < size; i++) {
-			path.add(Node.decodeNode((Document)d.get(String.valueOf(i))));
+			path.put(i, (Node.decodeNode((Document)d.get(String.valueOf(i)))));
 		}
 		double l = 0;
 		return new Route(veId, path, l);
@@ -158,7 +160,7 @@ public class Route {
 		System.out.println(d.toJson());
 	}
 
-	private List<Node> route;
+	private Map<Integer, Node> route;
 	private String vehicleId;
 	private int size;
 	private double lenght;
