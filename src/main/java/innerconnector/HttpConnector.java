@@ -57,7 +57,7 @@ public class HttpConnector {
 		Map<String, String> param = new HashMap<String, String>();
 		param.put("source", source.toString());
 		param.put("dest", dest.toString());
-		Response r = makeRequest("/roadNetwork/shortestPath", Method.GET, param,  null);
+		Response r = makeRequest("/roadnetwork/shortestPath", Method.GET, param,  null);
 		System.out.println(r.getStatus());
 		return r;
 	}
@@ -68,7 +68,7 @@ public class HttpConnector {
 	 * @return the Response of the  service
 	 */
 	public static Response getNodeById(String id) {
-		return makeRequest("/roadNetwork/"+id, Method.GET, null, null);
+		return makeRequest("/roadnetwork/"+id, Method.GET, null, null);
 	}
 	
 	/**
@@ -81,7 +81,7 @@ public class HttpConnector {
 		Map<String, String> param = new HashMap<String, String>();
 		param.put("latitude", lat.toString());
 		param.put("longitude", lon.toString());
-		return makeRequest("/roadNetwork/nearestNode", Method.GET, param, null);
+		return makeRequest("/roadnetwork/nearestNode", Method.GET, param, null);
 	}
 	
 	/**
@@ -90,7 +90,7 @@ public class HttpConnector {
 	 * @return the Response of the service
 	 */
 	public static Response getStreetbyId(String id) {
-		return makeRequest("/roadNetwork/street/"+id, Method.GET, null, null);
+		return makeRequest("/roadnetwork/street/"+id, Method.GET, null, null);
 	}
 	
 	/**
@@ -103,7 +103,7 @@ public class HttpConnector {
 		Map<String, String> param = new HashMap<String, String>();
 		param.put("start", start.toString());
 		param.put("dest", dest.toString());
-		return makeRequest("/roadNetwork/street", Method.GET, param, null);
+		return makeRequest("/roadnetwork/street", Method.GET, param, null);
 	}
 	
 	/**
@@ -116,8 +116,8 @@ public class HttpConnector {
 		Map<String, String> param = new HashMap<String, String>();
 		param.put("source", source.toString());
 		param.put("dest", dest.toString());
-		Response r = makeRequest("/roadNetwork/shortestStreet", Method.GET, param,  null);
-		System.out.println(r.getStatus());
+		Response r = makeRequest("/roadnetwork/shortestStreet", Method.GET, param,  null);
+		System.out.println("Get shortest street "+r.getStatus());
 		return r;
 	}
 	
@@ -127,7 +127,9 @@ public class HttpConnector {
 	 * @return the Response of the Service
 	 */
 	public static Response getVehicle(String id) {
-		return makeRequest("/vehicles/"+id, Method.GET, null, null);
+		Response r = makeRequest("/vehicles/"+id, Method.GET, null, null);
+		System.out.println("Get vehicle :" + r.getStatus());
+		return r;
 	}
 	
 	/**
@@ -135,18 +137,24 @@ public class HttpConnector {
 	 * @return the response of the service
 	 */
 	public static Response getAllWaitingBookings() {
-		return makeRequest("/bookings/waiting", Method.GET, null, null);
+		Response r = makeRequest("/bookings/status/waiting", Method.GET, null, null);
+		System.out.println("Get all waiting booking :" + r.getStatus());
+		return r;
 	}
 	
 	public static Response getAllOnBoardBookings(String vehicleId) {
-		return makeRequest("/bookings/onboard/"+vehicleId, Method.GET, null, null);
+		Response r = makeRequest("/bookings/status/onboard/"+vehicleId, Method.GET, null, null);
+		System.out.println("Get all onboard booking :" + r.getStatus());
+		return r;
 	}
 	/**
 	 * Reqeust all active vehicle form Vehicle service
 	 * @return the response of the serivice
 	 */
 	public static Response getAllVehicle() {
-		return makeRequest("/vehicles/all", Method.GET, null, null);
+		Response r = makeRequest("/vehicles/all", Method.GET, null, null);
+		System.out.println("Get all vehicle :" + r.getStatus());
+		return r;
 	}
 	
 	/**
@@ -154,7 +162,9 @@ public class HttpConnector {
 	 * @return the Response of the service
 	 */
 	public static Response getStandingPoints() {
-		return makeRequest("/roadNetwork/standingpoint", Method.GET, null, null);
+		Response r = makeRequest("/roadnetwork/standingpoint", Method.GET, null, null);
+		System.out.println("Get standing :" + r.getStatus());
+		return r;
 	}
 	
 	/**
@@ -162,7 +172,9 @@ public class HttpConnector {
 	 * @return the Response of the service
 	 */
 	public static Response getPickupPoints() {
-		return makeRequest("/roadNetwork/pickuppoint", Method.GET, null, null);
+		Response r = makeRequest("/roadnetwork/pickuppoint", Method.GET, null, null);
+		System.out.println("Get pickup :" + r.getStatus());
+		return r;
 	}
 	
 	private static final String baseAddress = "http://gateway-optimusbus.router.default.svc.cluster.local/optimusbus";

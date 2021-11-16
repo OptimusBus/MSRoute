@@ -294,6 +294,7 @@ public class BestRoute{
 		 */
 		System.out.println("Starting clusterization");
 		int size = wn.size();
+		System.out.println(wn.size());
 		List<Node> sub1 = wn.subList(0, (size/2));
 		List<Node> sub2 = wn.subList(size/2, size);
 		size = sub1.size();
@@ -312,7 +313,9 @@ public class BestRoute{
 		threads.add(new ParallelPath(tg, vehicles, sub2_2));
 		
 		for(ParallelPath p : threads) {
-			p.start();
+			p.start();	
+		}
+		for(ParallelPath p : threads) {
 			p.join();
 			records.addAll(p.getRecords());
 		}
@@ -326,6 +329,7 @@ public class BestRoute{
 			}
 		}
 		//execute the clusterization
+		if(records.isEmpty())return null;
 		Map<Centroid, List<Record>> clusters = KMeans.fit(records, vehicles.size(), new EuclideanDistance(), 20);
 		KMeans.printCluster(clusters);
 		/*
@@ -342,7 +346,7 @@ public class BestRoute{
 		System.out.println("Starting shortest path");
 		while(i.hasNext()) {
 			Document d = Document.parse(i.next().toString());
-			Vehicle v = this.getVehicle(d.getString("vehicleId"));
+			Vehicle v = this.getVehicle(d.getString("vehicleID"));
 			List<String> nodesId = (List<String>) d.get("departure");
 			List<Node> nodes = new ArrayList<Node>();
 			for(String id : nodesId) {
@@ -421,6 +425,7 @@ public class BestRoute{
 	public ArrayList<Node> getWaitingDeparture(){
 		ArrayList<Node> waitpick = new ArrayList<Node>();
 		for(Booking b : bookings) {
+			System.out.println(Booking.encodeBooking(b).toJson());
 			if(b.getStatus().equals(Booking.Status.WAITING)){
 				waitpick.add(b.getDeparture());
 			}
@@ -570,19 +575,24 @@ public class BestRoute{
 		 * del thread
 		 */
 		public void run() {
+			System.out.println("Starting thread");
 			Branch branch = new Branch();
 			Map<String, Node> vehNodes = new HashMap<>();
 			for (Vehicle v : vehicles) {
+				System.out.println("Requesting vehicle node");
 				Node nv = branch.getNearestNode(v.getLocation().getLatitude(), v.getLocation().getLongitude());
 				vehNodes.put(v.getVehicleId(), nv);
 			}
+			System.out.println("Terminata richiesta veicoli");
 			for(Node n : nodes) {
+				System.out.println("Nodes");
 				Map<String, Double> param = new HashMap<>();
 				for(String s : vehNodes.keySet()) {
 					Node nv = vehNodes.get(s);
 					int start = Integer.parseInt(nv.getNodeId());
 					int to = Integer.parseInt(n.getNodeId());
 					double r = branch.getShortestStreet(start, to);
+					System.out.print("Value :" + r);
 					param.put(s, -r);
 				}
 				records.add(new Record(n.getNodeId(), param));
