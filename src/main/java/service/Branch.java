@@ -9,16 +9,10 @@ import javax.ws.rs.core.Response;
 import org.bson.BsonArray;
 import org.bson.BsonValue;
 import org.bson.Document;
-import org.bson.conversions.Bson;
-
-import com.mongodb.BasicDBObject;
-import com.mongodb.util.JSON;
 
 import db.MongoConnector;
 import innerconnector.HttpConnector;
-import logger.StatusLogger;
 import model.Booking;
-import model.Location;
 import model.Node;
 import model.Route;
 import model.Street;
@@ -34,7 +28,8 @@ public class Branch implements BranchLocal {
 	@Override
 	public Route getRoute(String vehicleId) {
 		Document d = mdb.getRouteByVehicleId(vehicleId);
-		if(d.size()<0)return null;
+		if(d == null)return null;
+		if(d.size()==0)return null;
 		return Route.decodeRoute(d);
 	}
 	

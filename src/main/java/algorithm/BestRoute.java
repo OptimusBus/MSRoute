@@ -184,7 +184,8 @@ public class BestRoute{
 			Vehicle v = this.getVehicle(s);
 			List<Node> nodes = new ArrayList<>();
 			for(String nid : ns) {
-				nodes.add(this.getNode(nid));
+				Node n = this.getNode(nid);
+				if(!nodes.contains(n))nodes.add(n);
 			}
 			nodes.addAll(this.getWaitingDestination(nodes));
 			if(v.getRoute()!=null)nodes.addAll(v.getRoute().getRoute());
@@ -219,7 +220,7 @@ public class BestRoute{
 			wayPoint = BestRoute.sortedByValue(wayPoint);
 			List<Node> nodes2 = new ArrayList<Node>();
 			for(Node n : wayPoint.keySet()) {
-				nodes2.add(n);
+				if(!nodes2.contains(n))nodes2.add(n);
 			}
 			Route r = new Route(v.getVehicleId(), nodes2);
 			routes.add(r);

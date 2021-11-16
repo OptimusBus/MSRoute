@@ -39,8 +39,8 @@ public class RouteController {
 	@Path("/{id}")
 	public Response getRoute(@PathParam("id") String id) {
 		Route r = branch.getRoute(id);
-		if(r != null)return Response.noContent().entity("No route found for specified id").build();
-		return Response.ok().entity(r).build();
+		if(r == null)return Response.status(404).entity("No route found for specified id").build();
+		return Response.ok(r).build();
 	}
 	
 	@POST
@@ -49,7 +49,7 @@ public class RouteController {
 		Document d = Document.parse(s);
 		Vehicle v = Vehicle.decodeVehicle(d);
 		Vehicle best = branch.getNearestVehicle(v);
-		if(best != null)return Response.ok().entity(best.getVehicleId()).build();
+		if(best != null)return Response.ok(best.getVehicleId()).build();
 		return Response.status(404).entity("No vehicle found").build();
 		//prendiamo i veicoli disattivati
 		//poi valutiamo quelli che sono occupati
@@ -61,7 +61,7 @@ public class RouteController {
 		Document d = Document.parse(v);
 		Vehicle ve = Vehicle.decodeVehicle(d);
 		String s = branch.getBestStandingPoint(ve);
-		if(s != null)return Response.ok().entity(s).build();
+		if(s != null)return Response.ok(s).build();
 		return Response.status(500).entity("Impossible to find a standig point").build();
 	}
 	
@@ -72,7 +72,7 @@ public class RouteController {
 			List<Route> r = bestRoute.parallelAlgo2();
 			if(r == null) return Response.status(500).entity("Error while executing the algoritm").build();
 			//branch.saveAllRoute(r);
-			return Response.ok().entity(r).build();
+			return Response.ok(r).build();
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 			return Response.status(500).entity("Error while executing the algoritm").build();
@@ -88,7 +88,7 @@ public class RouteController {
 			List<Route> r = bestRoute.algo();
 			if(r == null) return Response.status(500).entity("Error while executing the algoritm").build();
 			branch.saveAllRoute(r);
-			return Response.ok().entity(r).build();
+			return Response.ok(r).build();
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 			return Response.status(500).entity("Error while executing the algoritm").build();
@@ -100,7 +100,7 @@ public class RouteController {
 	public Response getClusterData() {
 		BsonArray b = bestRoute.getClusterResult();
 		if(b != null)return Response.noContent().entity("No cluster found").build();
-		return Response.ok().entity(b).build();
+		return Response.ok(b).build();
 	}
 	
 	private BranchLocal branch = new Branch();

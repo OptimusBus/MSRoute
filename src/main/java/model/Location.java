@@ -24,8 +24,8 @@ public class Location {
 		this.longitude = longitude;
 	}
 	public double[] getCoordinates() {
-		coordinates[0] = latitude;
-		coordinates[1] = longitude;
+		coordinates[0] = this.latitude;
+		coordinates[1] = this.longitude;
 		return coordinates;
 	}
 	public static Location decodeLocation(Document d) {
@@ -46,6 +46,6 @@ public class Location {
 	}
 	private double latitude;
 	private double longitude;
-	private double coordinates[];
+	private double coordinates[] = {0, 0};
 }
 

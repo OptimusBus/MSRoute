@@ -4,7 +4,6 @@ package db;
 import org.bson.Document;
 
 import com.mongodb.MongoClient;
-import com.mongodb.bulk.InsertRequest;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.model.Filters;
@@ -27,7 +26,9 @@ public class MongoConnector {
 	public Document getRouteByVehicleId(String vehicleId) {
 		MongoDatabase db=m.getDatabase("RoutesDB");
 		MongoCollection<Document> coll=db.getCollection("routes");
-		return coll.find(Filters.eq("vehicleId", vehicleId)).first();
+		Document d =  coll.find(Filters.eq("vehicleId", vehicleId)).first();
+		System.out.println(d.toJson());
+		return d;
 	}
 	
 	/**

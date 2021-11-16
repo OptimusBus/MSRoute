@@ -42,6 +42,7 @@ public class Route {
 	 * Return all the Node of type PICKUPPOINT inside the route
 	 * @return a List<Node>
 	 */
+	/*
 	public List<Node> getPickUps() {
 		ArrayList<Node> picks = new ArrayList<Node>();
 		for(Node n : this.route) {
@@ -49,20 +50,20 @@ public class Route {
 			picks.add(n);
 		}
 		return picks;
-	}
+	}*/
 	
 	/**
 	 * Return all the Node of type STANDINGPOINT inside the route
 	 * @return a List<Node>
 	 */
-	public List<Node> getStandings() {
+	/*public List<Node> getStandings() {
 		ArrayList<Node> stand = new ArrayList<Node>();
 		for(Node n : this.route) {
 			if(n.getType() == Node.Type.STANDINGPOINT);
 			stand.add(n);
 		}
 		return stand;
-	}
+	}*/
 	
 	/**
 	 * Get the size of the Route as a number of Node
@@ -140,12 +141,13 @@ public class Route {
 		if(d.size()==0)return null;
 		String veId = d.getString("vehicleId");
 		int size = 0;
-		ArrayList<Node> route = new ArrayList<Node>();
+		if(d.getInteger("size")!=null)size = d.getInteger("size");
+		ArrayList<Node> path = new ArrayList<Node>();
 		for(int i = 0; i < size; i++) {
-			route.add(Node.decodeNode((Document)d.get(String.valueOf(i))));
+			path.add(Node.decodeNode((Document)d.get(String.valueOf(i))));
 		}
-		double lenght = 0;
-		return new Route(veId, route, lenght);
+		double l = 0;
+		return new Route(veId, path, l);
 	}
 	
 	/**
