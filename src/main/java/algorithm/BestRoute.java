@@ -133,23 +133,6 @@ public class BestRoute{
 		List<Node> wn = getWaitingDeparture();
 		ArrayList<Record> records = new ArrayList<>();
 		ThreadGroup tg = new ThreadGroup("records");
-		/*ArrayList<ParallelPath> threads = new ArrayList<>();
-		System.out.println("Starting clusterization");
-		int size = wn.size();
-		System.out.println(wn.size());
-		List<Node> sub1 = wn.subList(0, (size/2));
-		List<Node> sub2 = wn.subList(size/2, size);
-		size = sub1.size();
-		List<Node> sub1_1 = sub1.subList(0, (size/2));
-		List<Node> sub1_2 = sub1.subList(size/2, size);
-		size = sub2.size();
-		List<Node> sub2_1 = sub2.subList(0, (size/2));
-		List<Node> sub2_2 = sub2.subList(size/2, size);
-		
-		threads.add(new ParallelPath(tg, vehicles, sub1_1));
-		threads.add(new ParallelPath(tg, vehicles, sub1_2));
-		threads.add(new ParallelPath(tg, vehicles, sub2_1));
-		threads.add(new ParallelPath(tg, vehicles, sub2_2));*/
 		
 		ParallelPath p = new ParallelPath(tg, vehicles, wn);
 		p.start();

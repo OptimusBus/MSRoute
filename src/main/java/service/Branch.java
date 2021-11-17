@@ -248,12 +248,14 @@ public class Branch implements BranchLocal {
 		double min = 999999999999999999.0;
 		Vehicle best = new Vehicle();
 		for(Vehicle ve : vehicles) {
-			Node d = this.getNearestNode(ve.getLocation().getLatitude(), ve.getLocation().getLongitude());
-			if(d != null) {
-				double temp = this.getShortestStreet(start, Integer.parseInt(d.getNodeId()));
-				if(temp < min) {
-					min = temp;
-					best = ve;
+			if(!ve.getVehicleId().equals(v.getVehicleId())) {
+				Node d = this.getNearestNode(ve.getLocation().getLatitude(), ve.getLocation().getLongitude());
+				if(d != null) {
+					double temp = this.getShortestStreet(start, Integer.parseInt(d.getNodeId()));
+					if(temp < min) {
+						min = temp;
+						best = ve;
+					}
 				}
 			}
 		}

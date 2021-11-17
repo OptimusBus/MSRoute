@@ -83,7 +83,7 @@ public class RouteController {
 	@Path("/cluster")
 	public Response getClusterData() {
 		BsonArray b = bestRoute.getClusterResult();
-		if(b != null)return Response.noContent().entity("No cluster found").build();
+		if(b == null)return Response.noContent().entity("No cluster found").build();
 		return Response.ok(b).build();
 	}
 	
