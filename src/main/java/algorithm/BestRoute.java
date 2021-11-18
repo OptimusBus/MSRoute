@@ -162,6 +162,7 @@ public class BestRoute{
 		System.out.println(this.clusterResult.toString());
 		Map<Vehicle, List<Node>> data = new HashMap<>();
 		Map<String, List<String>> result = KMeans.returnClusterMap(clusters);
+		Branch branch = new Branch();
 		for(String s : result.keySet()) {
 			List<String> ns = result.get(s);
 			Vehicle v = this.getVehicle(s);
@@ -171,8 +172,9 @@ public class BestRoute{
 				if(nodes.indexOf(n) < 0)nodes.add(n);
 			}
 			nodes.addAll(this.getWaitingDestination(nodes));
-			if(v.getRoute()!=null) {
-				Map<Integer, Node> vrt = v.getRoute().getRoute();
+			Route r = branch.getRoute(v.getVehicleId());
+			if(r!=null) {
+				Map<Integer, Node> vrt = r.getRoute();
 				for(Integer i : vrt.keySet()) {
 					Node n = vrt.get(i);
 					if(nodes.indexOf(n) < 0)nodes.add(n);
@@ -182,12 +184,10 @@ public class BestRoute{
 		}
 		
 		System.out.println("Starting shortest path");
-		Branch branch = new Branch();
 		List<Route> routes = new ArrayList<>();
 		for(Vehicle v : data.keySet()) {
-			List<Node> nodes = data.get(v);
 			Map<String, Double> wayPoint = new HashMap<>();
-			for(Node n : nodes) {
+			for(Node n : data.get(v)) {
 				for(Record r : records) {
 					if(r.getDescription().equals(n.getNodeId())) {
 						wayPoint.put(n.getNodeId(), - r.getFeatures().get(v.getVehicleId()));
@@ -196,21 +196,25 @@ public class BestRoute{
 					}
 				}
 			}
+			Node vehicleNode = branch.getNearestNode(v.getLocation().getLatitude(), v.getLocation().getLongitude());
+			int start = Integer.parseInt(vehicleNode.getNodeId());
 			for(String n : wayPoint.keySet()) {
 				double leng = wayPoint.get(n);
 				if(leng <= 0) {
 					System.out.println("Requesting path");
-					int start = Integer.parseInt(
-							branch.getNearestNode(v.getLocation().getLatitude(), v.getLocation().getLongitude()).getNodeId());
 					int end = Integer.parseInt(n);
-					wayPoint.put(n, branch.getShortestStreet(start, end ));
+					wayPoint.put(n, branch.getShortestStreet(start, end));
 				}
 			}
 			wayPoint = BestRoute.sortedByValue(wayPoint);
 			Map<Integer, Node> nodes2 = new HashMap<Integer, Node>();
 			int i = 0;
+			System.out.println("VehicleId :" + v.getVehicleId());
 			for(String n : wayPoint.keySet()) {
-				
+//				if(i == 0) {
+//					nodes2.put(i, vehicleNode);
+//				}
+				System.out.println("\tNode : " + this.getNode(n).getNodeId() + "Value " + wayPoint.get(n) );
 				nodes2.put(i, this.getNode(n));
 				i++;
 			}
@@ -585,7 +589,7 @@ public class BestRoute{
 	public static Map<String, Double> sortedByValue(Map<String, Double> wayPoint){
 		 return wayPoint.entrySet()
 	                .stream()
-	                .sorted((Map.Entry.<String, Double>comparingByValue().reversed()))
+	                .sorted((Map.Entry.<String, Double>comparingByValue()))
 	                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (e1, e2) -> e1, LinkedHashMap::new));
 	}
 	
