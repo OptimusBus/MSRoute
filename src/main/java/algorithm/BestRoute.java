@@ -217,11 +217,11 @@ public class BestRoute{
 			Route r = new Route(v.getVehicleId(), nodes2);
 			routes.add(r);
 		}
-		//branch.saveAllRoute(routes);
 		System.out.println("END");
 		for(Route r : routes) {
 			r.printRoute();
 		}
+		if(!routes.isEmpty())branch.saveAllRoute(routes);
 		return routes;	
 	}
 	
