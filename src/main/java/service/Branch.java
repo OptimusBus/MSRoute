@@ -198,6 +198,7 @@ public class Branch implements BranchLocal {
 				mdb.saveRoute(r);
 			}
 		}
+		mdb.close();
 	}
 	
 	/**
@@ -282,7 +283,4 @@ public class Branch implements BranchLocal {
 	}
 	
 	private MongoConnector mdb = new MongoConnector();
-
-	
-
 }

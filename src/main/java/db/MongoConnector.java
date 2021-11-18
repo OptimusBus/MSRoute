@@ -55,5 +55,9 @@ public class MongoConnector {
 		return false;
 	}
 	
+	public void close() {
+		m.close();
+	}
+	
 	private static final MongoClient m = new MongoClient("137.121.170.248",31186);
 }
