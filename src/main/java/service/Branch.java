@@ -198,7 +198,6 @@ public class Branch implements BranchLocal {
 				mdb.saveRoute(r);
 			}
 		}
-		mdb.close();
 	}
 	
 	/**
