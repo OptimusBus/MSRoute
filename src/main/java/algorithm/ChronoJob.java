@@ -2,13 +2,13 @@ package algorithm;
 import javax.ejb.Schedule;
 import javax.ejb.Singleton;
 
-@Singleton
+//@Singleton
 public class ChronoJob {
 
 	/**
 	 * Execute the Best Route algorithm every 10 minute
 	 */
-     @Schedule(hour = "*", minute = "*/10", second = "*", persistent = false)
+     //@Schedule(hour = "*", minute = "*/10", second = "*", persistent = false)
      private void calcAlgo() {
         try {
         	ChronoThread t = new ChronoThread();
