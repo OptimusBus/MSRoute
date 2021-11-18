@@ -172,7 +172,7 @@ public class BestRoute{
 				if(nodes.indexOf(n) < 0)nodes.add(n);
 			}
 			nodes.addAll(this.getWaitingDestination(nodes));
-			Route r = branch.getRoute(v.getVehicleId());
+			Route r = v.getRoute();
 			if(r!=null) {
 				Map<Integer, Node> vrt = r.getRoute();
 				for(Integer i : vrt.keySet()) {
