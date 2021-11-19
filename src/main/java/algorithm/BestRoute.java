@@ -187,26 +187,39 @@ public class BestRoute{
 		List<Route> routes = new ArrayList<>();
 		for(Vehicle v : data.keySet()) {
 			Map<String, Double> wayPoint = new HashMap<>();
+			Map<String, Double> wayPointsTemp = new HashMap<>();
 			for(Node n : data.get(v)) {
 				for(Record r : records) {
 					if(r.getDescription().equals(n.getNodeId())) {
-						wayPoint.put(n.getNodeId(), - r.getFeatures().get(v.getVehicleId()));
+						wayPointsTemp.put(n.getNodeId(), -1.0);
 					}else {
-						wayPoint.put(n.getNodeId(), -1.0);
+						wayPointsTemp.put(n.getNodeId(), -1.0);
 					}
 				}
 			}
 			Node vehicleNode = branch.getNearestNode(v.getLocation().getLatitude(), v.getLocation().getLongitude());
 			int start = Integer.parseInt(vehicleNode.getNodeId());
-			for(String n : wayPoint.keySet()) {
-				double leng = wayPoint.get(n);
-				if(leng <= 0) {
-					System.out.println("Requesting path");
-					int end = Integer.parseInt(n);
-					wayPoint.put(n, branch.getShortestStreet(start, end));
+			int tN = wayPointsTemp.size(); // numero nodi totale
+			for(int x = 0; x < tN; x++) {
+				Map<String, Double> m = new HashMap<>();
+				for(String n : wayPointsTemp.keySet()) {		
+					double leng = wayPointsTemp.get(n);
+					if(leng <= 0) {
+						System.out.println("Requesting path");
+						int end = Integer.parseInt(n);
+						m.put(n, branch.getShortestStreet(start, end));
+					}
 				}
+				Map<String, Double> t = BestRoute.sortedByValue(m);
+				String s = (String) t.keySet().toArray()[0];
+				wayPoint.put(s, (double) x);
+				start = Integer.parseInt(s);
+				wayPointsTemp.remove(s);
 			}
+			
 			wayPoint = BestRoute.sortedByValue(wayPoint);
+			
+			
 			Map<Integer, Node> nodes2 = new HashMap<Integer, Node>();
 			int i = 0;
 			System.out.println("VehicleId :" + v.getVehicleId());
